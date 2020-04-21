@@ -16,24 +16,21 @@ sbit LED2 = P2 ^ 2;
 sbit LED3 = P2 ^ 3;
 sbit LED4 = P2 ^ 4;
 sbit LED5 = P2 ^ 5;
-
-sfr chip_0 = 0xA1;
-sfr chip_1 = 0xA2;
-sfr chip_2 = 0xA3;
-sfr chip_3 = 0xA4;
 void main()
 {
     CfgFsys();  // CH547时钟选择配置
     mDelaymS(20);
     mInitSTDIO();  //串口0初始化
-    printf("CH547 demo start ...\n");
-    printf("CHIP ID:%04x,%ld\n", CHIP_ID, CHIP_ID);
-    printf("chip_x %04x %04x %04x %04x \n", chip_0, chip_1, chip_2, chip_3);
-    CH547WDTModeSelect(1);
+    printf("Start @ChipID=%02X\n", (UINT16)CHIP_ID);
+
+    // CH547WDTModeSelect(1);
 #ifdef T0_INT
-    timer0Init();
+    // timer0Init();
 #endif
-    TouchKey_Init();
+#ifdef T2_CAP2
+    CAP2Init(1);
+#endif
+    // TouchKey_Init();
     while (1)
     {
         if (flag1ms)

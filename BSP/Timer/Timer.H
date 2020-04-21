@@ -5,7 +5,7 @@
 #define  T0_INT   1
 //#define  T1_INT   1
 //#define  T2_INT   1
-//#define  T2_CAP2   1
+#define  T2_CAP2   1
 /******************* CH547 Timer0相关 ************************/
 //bTMR_CLK同时影响Timer0&1&2,使用时要注意 (除定时使用标准时钟)
 #define mTimer0Clk12DivFsys( ) (T2MOD &= ~bT0_CLK)                          //定时器,时钟=Fsys/12 T0标准时钟

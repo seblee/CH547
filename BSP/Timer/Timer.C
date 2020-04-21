@@ -8,8 +8,8 @@
 *******************************************************************************/
 #include ".\Timer\Timer.H"
 #pragma NOAREGS
-#ifdef T2_CAP
-UINT16 Cap2[2] = {0};
+#ifdef T2_CAP2
+UINT16 Cap_2[2] = {0};
 #endif
 #ifdef T0_INT
 UINT16 counter1Ms = 0;
@@ -43,8 +43,8 @@ UINT8 mTimer_x_ModInit(UINT8 x, UINT8 mode)
     }
     else if (x == 2)
     {
-        RCLK = 0; //16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
-        TCLK = 0;
+        RCLK   = 0;  // 16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
+        TCLK   = 0;
         CP_RL2 = 0;
     }
     else
@@ -54,12 +54,12 @@ UINT8 mTimer_x_ModInit(UINT8 x, UINT8 mode)
     return SUCCESS;
 }
 /*******************************************************************************
-* Function Name  : mTimer_x_SetData(UINT8 x,UINT16 dat)
-* Description    : CH547Timer0 TH0ºÍTL0¸³Öµ
-* Input          : UINT16 dat;¶¨Ê±Æ÷¸³Öµ
-* Output         : None
-* Return         : None
-*******************************************************************************/
+ * Function Name  : mTimer_x_SetData(UINT8 x,UINT16 dat)
+ * Description    : CH547Timer0 TH0ºÍTL0¸³Öµ
+ * Input          : UINT16 dat;¶¨Ê±Æ÷¸³Öµ
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
 void mTimer_x_SetData(UINT8 x, UINT16 dat)
 {
     UINT16 tmp;
@@ -76,7 +76,7 @@ void mTimer_x_SetData(UINT8 x, UINT16 dat)
     }
     else if (x == 2)
     {
-        RCAP2L = TL2 = tmp & 0xff; //16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
+        RCAP2L = TL2 = tmp & 0xff;  // 16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
         RCAP2H = TH2 = (tmp >> 8) & 0xff;
     }
 }
@@ -97,34 +97,40 @@ void CAP2Init(UINT8 mode)
     RCLK = 0;
     TCLK = 0;
     C_T2 = 0;
+
+    // T2MOD &= ~(bT2_CLK | bTMR_CLK);
+    T2MOD |= (mode << 2);  //±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+    CP_RL2 = 1;            //Æô¶¯T2exµÄ²¶×½¹¦ÄÜ
+    TR2    = 1;
+
     EXEN2 = 1;
-    CP_RL2 = 1;         //Æô¶¯T2exµÄ²¶×½¹¦ÄÜ
-    T2MOD |= mode << 2; //±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+    ET2   = 1;
+    EA    = 1;
 }
 #endif
 #ifdef T0_INT
 /*******************************************************
- * 
- * 
+ *
+ *
  * */
 void timer0Init(void)
 {
     printf("T0 Test ...\n");
-    mTimer0Clk12DivFsys();     //T0¶¨Ê±Æ÷Ê±ÖÓÉèÖÃ FREQ_SYS/12
-    mTimer_x_ModInit(0, 1);    //T0 ¶¨Ê±Æ÷Ä£Ê½ÉèÖÃ Ä£Ê½1 16Î»¶¨Ê±Æ÷
-    mTimer_x_SetData(0, 2000); //T0¶¨Ê±Æ÷¸³Öµ 24MHZ 1MSÖÐ¶Ï
-    mTimer0RunCTL(1);          //T0¶¨Ê±Æ÷Æô¶¯
-    ET0 = 1;                   //T0¶¨Ê±Æ÷ÖÐ¶Ï¿ªÆô
-    EA = 1;
+    mTimer0Clk12DivFsys();      // T0¶¨Ê±Æ÷Ê±ÖÓÉèÖÃ FREQ_SYS/12
+    mTimer_x_ModInit(0, 1);     // T0 ¶¨Ê±Æ÷Ä£Ê½ÉèÖÃ Ä£Ê½1 16Î»¶¨Ê±Æ÷
+    mTimer_x_SetData(0, 2000);  // T0¶¨Ê±Æ÷¸³Öµ 24MHZ 1MSÖÐ¶Ï
+    mTimer0RunCTL(1);           // T0¶¨Ê±Æ÷Æô¶¯
+    ET0 = 1;                    // T0¶¨Ê±Æ÷ÖÐ¶Ï¿ªÆô
+    EA  = 1;
 }
 /*******************************************************************************
-* Function Name  : mTimer0Interrupt()
-* Description    : CH547¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 1msÖÐ¶Ï
-*******************************************************************************/
-void mTimer0Interrupt(void) interrupt INT_NO_TMR0 using 1 //timer0ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é1
+ * Function Name  : mTimer0Interrupt()
+ * Description    : CH547¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 1msÖÐ¶Ï
+ *******************************************************************************/
+void mTimer0Interrupt(void) interrupt INT_NO_TMR0 using 1  // timer0ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é1
 {
-    mTimer_x_SetData(0, 2000); //Ä£Ê½1 ÐèÖØÐÂ¸øTH0ºÍTL0¸³Öµ
-    SCK = ~SCK;                //´óÔ¼1ms
+    mTimer_x_SetData(0, 2000);  //Ä£Ê½1 ÐèÖØÐÂ¸øTH0ºÍTL0¸³Öµ
+    SCK = ~SCK;                 //´óÔ¼1ms
     counter1Ms++;
     flag1ms = 1;
     if (counter1Ms % 10 == 0)
@@ -137,48 +143,51 @@ void mTimer0Interrupt(void) interrupt INT_NO_TMR0 using 1 //timer0ÖÐ¶Ï·þÎñ³ÌÐò,Ê
 #endif
 #ifdef T1_INT
 /*******************************************************************************
-* Function Name  : mTimer1Interrupt()
-* Description    : CH547¶¨Ê±¼ÆÊýÆ÷1¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 100usÖÐ¶Ï
-*******************************************************************************/
-void mTimer1Interrupt(void) interrupt INT_NO_TMR1 using 2 //timer1ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é2
+ * Function Name  : mTimer1Interrupt()
+ * Description    : CH547¶¨Ê±¼ÆÊýÆ÷1¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 100usÖÐ¶Ï
+ *******************************************************************************/
+void mTimer1Interrupt(void) interrupt INT_NO_TMR1 using 2  // timer1ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é2
 {
     //·½Ê½2Ê±£¬Timer1×Ô¶¯ÖØ×°
     static UINT16 tmr1 = 0;
     tmr1++;
-    if (tmr1 == 2000) //100us*2000 = 200ms
+    if (tmr1 == 2000)  // 100us*2000 = 200ms
     {
         tmr1 = 0;
-        SCK = ~SCK;
+        SCK  = ~SCK;
     }
 }
 #endif
 /*******************************************************************************
-* Function Name  : mTimer2Interrupt()
-* Description    : CH547¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý
-*******************************************************************************/
-void mTimer2Interrupt(void) interrupt INT_NO_TMR2 using 3 //timer2ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é3
+ * Function Name  : mTimer2Interrupt()
+ * Description    : CH547¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý
+ *******************************************************************************/
+void mTimer2Interrupt(void) interrupt INT_NO_TMR2 using 3  // timer2ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷×é3
 {
 #ifdef T2_INT
     static UINT8 tmr2 = 0;
     if (TF2)
     {
-        TF2 = 0; //Çå¿Õ¶¨Ê±Æ÷2Òç³öÖÐ¶Ï,ÐèÊÖ¶¯Çë
+        TF2 = 0;  //Çå¿Õ¶¨Ê±Æ÷2Òç³öÖÐ¶Ï,ÐèÊÖ¶¯Çë
         tmr2++;
-        if (tmr2 == 100) //200msÊ±¼äµ½
+        if (tmr2 == 100)  // 200msÊ±¼äµ½
         {
             tmr2 = 0;
-            SCK = ~SCK; //P17µçÆ½Ö¸Ê¾¼à¿Ø
+            SCK  = ~SCK;  // P17µçÆ½Ö¸Ê¾¼à¿Ø
         }
     }
 #endif
 
 #ifdef T2_CAP2
-    if (EXF2) //T2exµçÆ½±ä»¯ÖÐ¶ÏÖÐ¶Ï±êÖ¾
+    if (EXF2)  // T2exµçÆ½±ä»¯ÖÐ¶ÏÖÐ¶Ï±êÖ¾
     {
-        Cap2[0] = RCAP2; //T2EX
-        printf("CAP2 %04x\n", Cap2[0] - Cap2[1]);
-        Cap2[1] = Cap2[0];
-        EXF2 = 0; //Çå¿ÕT2ex²¶×½ÖÐ¶Ï±êÖ¾
+        Cap_2[0] = RCAP2;  // T2EX
+        printf("CAP2 %04x\n", Cap_2[0] - Cap_2[1]);
+        printf("CAP2 %04x\n", Cap_2[0]);
+        Cap_2[1] = Cap_2[0];
+        EXF2     = 0;  //Çå¿ÕT2ex²¶×½ÖÐ¶Ï±êÖ¾
+        TH2      = 0;
+        TL2      = 0;
     }
 #endif
 }
