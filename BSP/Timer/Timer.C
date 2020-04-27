@@ -15,6 +15,7 @@ UINT16 Cap_2[2] = {0};
 UINT16 counter1Ms = 0;
 bit flag1ms;
 bit flag10ms;
+bit flag63ms;
 bit flag250ms;
 bit flag500ms;
 #endif
@@ -135,6 +136,8 @@ void mTimer0Interrupt(void) interrupt INT_NO_TMR0 using 1  // timer0中断服务程序
     flag1ms = 1;
     if (counter1Ms % 10 == 0)
         flag10ms = 1;
+    if (counter1Ms % 63 == 0)
+        flag63ms = 1;
     if (counter1Ms % 250 == 0)
         flag250ms = 1;
     if (counter1Ms % 500 == 0)
@@ -182,12 +185,18 @@ void mTimer2Interrupt(void) interrupt INT_NO_TMR2 using 3  // timer2中断服务程序
     if (EXF2)  // T2ex电平变化中断中断标志
     {
         Cap_2[0] = RCAP2;  // T2EX
-        printf("CAP2 %04x\n", Cap_2[0] - Cap_2[1]);
-        printf("CAP2 %04x\n", Cap_2[0]);
-        Cap_2[1] = Cap_2[0];
-        EXF2     = 0;  //清空T2ex捕捉中断标志
-        TH2      = 0;
-        TL2      = 0;
+        if (AIN1)
+        {
+            // printf("P1.1 Rising %04x\n", Cap_2[0]);
+        }
+        else
+        {
+            // printf("P1.1 Falling %04x\n", Cap_2[0]);
+        }
+
+        EXF2 = 0;  //清空T2ex捕捉中断标志
+        TH2  = 0;
+        TL2  = 0;
     }
 #endif
 }

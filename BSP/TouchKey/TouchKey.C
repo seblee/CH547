@@ -184,13 +184,13 @@ void getKeyBitMap(void)
         if (err < UP_THRESHOLD_VALUE)
             keyState.word &= ~(1 << i);
     }
-    // printf("Keyvalue:%04d %04d %04d %04d\n", Keyvalue[8], Keyvalue[9], Keyvalue[10], Keyvalue[11]);
 
     keyTrg[0].word = keyState.word & (keyState.word ^ k_count[0]);
     k_count[0]     = keyState.word;
 
     if (keyTrg[0].word)
     {
+        beepCount++;
     }
 
     for (i = 8; i < 12; i++)
@@ -217,6 +217,7 @@ void getKeyBitMap(void)
     k_count[1]     = keyRestain;
     if (keyTrg[1].word)
     {
+        beepCount++;
     }
 }
 

@@ -5,9 +5,9 @@
 #include ".\Public\DEBUG.H"
 #define EN_ADC_INT 1
 #define DOWM_THRESHOLD_VALUE 400  //按下阈值定义
-#define UP_THRESHOLD_VALUE 50      //抬起阈值
-#define KEY_BUF_LEN 10             //每个KEY按键对应的滤波缓冲区大小（库修改无效）20
-#define KEY_BUF_LOST 2             //排序后前后分别丢弃的字节数（库修改无效） 5
+#define UP_THRESHOLD_VALUE 50     //抬起阈值
+#define KEY_BUF_LEN 10            //每个KEY按键对应的滤波缓冲区大小（库修改无效）20
+#define KEY_BUF_LOST 2            //排序后前后分别丢弃的字节数（库修改无效） 5
 
 typedef struct
 {
@@ -59,6 +59,8 @@ extern UINT8C CPW_Table[16];
 extern UINT16 Keyvalue[16];
 extern volatile _TKS_FLAGA16_type keyTrg[2];
 extern volatile UINT16 k_count[2];
+
+extern UINT8 beepCount;
 
 #define KEY1 keyTrg[0].bits.b11
 #define KEY2 keyTrg[0].bits.b10

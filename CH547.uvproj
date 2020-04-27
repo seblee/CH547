@@ -324,7 +324,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\BSP</IncludePath>
+              <IncludePath>.\BSP;.\USER</IncludePath>
             </VariousControls>
           </C51>
           <Ax51>
@@ -410,6 +410,11 @@
               <FileName>TouchKey.C</FileName>
               <FileType>1</FileType>
               <FilePath>.\BSP\TouchKey\TouchKey.C</FilePath>
+            </File>
+            <File>
+              <FileName>PWM.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\BSP\PWM\PWM.C</FilePath>
             </File>
           </Files>
         </Group>
