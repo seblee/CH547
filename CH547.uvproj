@@ -381,6 +381,11 @@
               <FileType>1</FileType>
               <FilePath>.\USER\Main.C</FilePath>
             </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USER\beep.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

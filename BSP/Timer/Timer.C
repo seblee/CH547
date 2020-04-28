@@ -14,10 +14,10 @@ UINT16 Cap_2[2] = {0};
 #ifdef T0_INT
 UINT16 counter1Ms = 0;
 bit flag1ms;
-bit flag10ms;
-bit flag63ms;
-bit flag250ms;
-bit flag500ms;
+bit flag10;
+bit flag63;
+bit flag250;
+bit flag500;
 #endif
 /*******************************************************************************
 * Function Name  : mTimer_x_ModInit(UINT8 x ,UINT8 mode)
@@ -135,13 +135,13 @@ void mTimer0Interrupt(void) interrupt INT_NO_TMR0 using 1  // timer0中断服务程序
     counter1Ms++;
     flag1ms = 1;
     if (counter1Ms % 10 == 0)
-        flag10ms = 1;
+        flag10 = 1;
     if (counter1Ms % 63 == 0)
-        flag63ms = 1;
+        flag63 = 1;
     if (counter1Ms % 250 == 0)
-        flag250ms = 1;
+        flag250 = 1;
     if (counter1Ms % 500 == 0)
-        flag500ms = 1;
+        flag500 = 1;
 }
 #endif
 #ifdef T1_INT

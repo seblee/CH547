@@ -31,10 +31,10 @@
 
 extern UINT16 counter1Ms;
 extern bit flag1ms;
-extern bit flag10ms;
-extern bit flag63ms;
-extern bit flag250ms;
-extern bit flag500ms;
+extern bit flag10;
+extern bit flag63;
+extern bit flag250;
+extern bit flag500;
 /*******************************************************
  * 
  * 

@@ -9,23 +9,7 @@
 #define KEY_BUF_LEN 10            //每个KEY按键对应的滤波缓冲区大小（库修改无效）20
 #define KEY_BUF_LOST 2            //排序后前后分别丢弃的字节数（库修改无效） 5
 
-typedef struct
-{
-    unsigned char b0 : 1;
-    unsigned char b1 : 1;
-    unsigned char b2 : 1;
-    unsigned char b3 : 1;
-    unsigned char b4 : 1;
-    unsigned char b5 : 1;
-    unsigned char b6 : 1;
-    unsigned char b7 : 1;
-} _FLAG_bits;
 
-typedef union
-{
-    _FLAG_bits bits;
-    unsigned char byte;
-} _TKS_FLAGA_type;
 
 typedef struct
 {

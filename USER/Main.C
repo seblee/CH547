@@ -12,7 +12,8 @@
 #include ".\Timer\Timer.H"
 #include ".\TouchKey\TouchKey.H"
 #include ".\UART\UART.H"
-#include ".\PWM\PWM.H"
+#include "beep.h"
+#include "user_type.h"
 
 #pragma NOAREGS
 // sbit LED2 = P2 ^ 2;
@@ -20,9 +21,11 @@ sbit LED3 = P2 ^ 3;
 sbit LED4 = P2 ^ 4;
 sbit LED5 = P2 ^ 5;
 
-bit beepFlag    = 0;
-UINT8 beepCount = 1;
-
+volatile _TKS_FLAGA_type bitFlag;
+#define flag10ms bitFlag.bits.b0
+#define flag63ms bitFlag.bits.b1
+#define flag250ms bitFlag.bits.b2
+#define flag500ms bitFlag.bits.b3
 /*******************************************************************************
  * Function Name  : LED_Port_Init
  * Description    : LED引脚初始化,推挽输出
@@ -36,6 +39,41 @@ void LED_Port_Init(void)
     P2 |= (0xF << 2);  //默认熄灭
     P2_MOD_OC &= ~(0xF << 2);
     P2_DIR_PU |= (0xF << 2);
+
+    LED3 = 1;
+    LED4 = 1;
+    LED5 = 1;
+}
+
+void getBitFlag(void)
+{
+    if (flag10)
+    {
+        flag10   = 0;
+        flag10ms = 1;
+    }
+    if (flag63)
+    {
+        flag63   = 0;
+        flag63ms = 1;
+    }
+    if (flag250)
+    {
+        flag250   = 0;
+        flag250ms = 1;
+    }
+    if (flag500)
+    {
+        flag500   = 0;
+        flag500ms = 1;
+    }
+}
+void bitClear(void)
+{
+    flag10ms  = 0;
+    flag63ms  = 0;
+    flag250ms = 0;
+    flag500ms = 0;
 }
 
 void main()
@@ -50,85 +88,33 @@ void main()
     timer0Init();
 #endif
     TouchKey_Init();
-    /* 时钟 频率设置 */
-    SetPWMClkDiv(4);     // PWM时钟配置,FREQ_SYS/4
-    SetPWMCycle64Clk();  // PWM周期 FREQ_SYS/4/64
-    SetPWM3Dat(64);
-    PWM_SEL_CHANNEL(CH3, Enable);
+    beepInit();
 
-    LED3 = 1;
-    LED4 = 1;
-    LED5 = 1;
     while (1)
     {
-        // I2C_IO_Check();
         if (flag1ms)
         {
-            flag1ms = 0;
+            getBitFlag();
         }
         if (flag10ms)
         {
             getKeyBitMap();
-            if (KEY1)
-            {
-                printf("key1 pressed\n");
-            }
-            if (KEY2)
-            {
-                printf("key2 pressed\n");
-            }
-            if (KEY3)
-            {
-                printf("key3 pressed\n");
-            }
-            if (KEY4)
-            {
-                printf("key4 pressed\n");
-            }
-
-            if (KEY1Restan)
-            {
-                printf("key1Restan pressed\n");
-            }
-            if (KEY2Restan)
-            {
-                printf("key2Restan pressed\n");
-            }
-            if (KEY3Restan)
-            {
-                printf("key3Restan pressed\n");
-            }
-            if (KEY4Restan)
-            {
-                printf("key4Restan pressed\n");
-            }
-
-            flag10ms = 0;
         }
         if (flag63ms)
         {
-            flag63ms = 0;
-            if (beepFlag)
-            {
-                beepFlag = 0;
-                beepOFF;
-            }
-            else if (beepCount)
-            {
-                beepCount--;
-                beepFlag = 1;
-                beepON;
-            }
+            beepShortBee();
         }
         if (flag250ms)
         {
-            flag250ms = 0;
             CH547WDTFeed(0);
         }
         if (flag500ms)
         {
-            // LED5      = ~LED5;
-            flag500ms = 0;
+            LED5 = ~LED5;
+        }
+        if (bitFlag.byte)
+        {
+            bitClear();
         }
     }
 }
