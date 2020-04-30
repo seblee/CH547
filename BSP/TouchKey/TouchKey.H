@@ -3,13 +3,11 @@
 #define __TOUCHKEY_H__
 #include ".\Public\CH547.H"
 #include ".\Public\DEBUG.H"
-#define EN_ADC_INT 1
+#define EN_ADC_INT 0
 #define DOWM_THRESHOLD_VALUE 400  //按下阈值定义
 #define UP_THRESHOLD_VALUE 50     //抬起阈值
 #define KEY_BUF_LEN 10            //每个KEY按键对应的滤波缓冲区大小（库修改无效）20
 #define KEY_BUF_LOST 2            //排序后前后分别丢弃的字节数（库修改无效） 5
-
-
 
 typedef struct
 {
@@ -63,4 +61,5 @@ void TouchKeychannelSelect(UINT8 cpw);
 void getKeyBitMap(void);
 void ADCInterruptEnable(void);
 void touchKeyFirstValue(void);
+void touchKeyGet(void);
 #endif

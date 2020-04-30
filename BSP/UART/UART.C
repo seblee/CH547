@@ -76,6 +76,8 @@ void CH549UART1SendByte(UINT8 SendDat)
 * Function Name  : UART1Interrupt(void)
 * Description    : UART1 中断服务程序
 *******************************************************************************/
+void serialRx(UINT8 dat);
+extern bit txComplete;
 void UART1Interrupt( void ) interrupt INT_NO_UART1 using 1                //串口1中断服务程序,使用寄存器组1
 {
     UINT8 dat;
@@ -83,8 +85,9 @@ void UART1Interrupt( void ) interrupt INT_NO_UART1 using 1                //串口
     {
         SIF1 = bU1RI;                                                     //清除接收完中断
         dat = SBUF1;
-        CH549UART1SendByte(dat);
+        serialRx(dat);
     }
+
 }
 #endif
 /*******************************************************************************

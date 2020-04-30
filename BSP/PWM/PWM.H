@@ -36,7 +36,5 @@ extern void PWM_SEL_CHANNEL(UINT8 Channel,UINT8 NewState);                //PWMÍ
 #ifdef PWM_INTERRUPT
 extern void PWMInterruptEnable();                                         //Ê¹ÄÜPWMÖÜÆÚÒç³öÖÐ¶Ï
 #endif
-#define beepON      SetPWM3Dat(32)
-#define beepOFF      SetPWM3Dat(64)
 
 #endif

@@ -58,4 +58,19 @@ enum
     STATE_LED_FLASH_3_T,  //闪烁三下
 };
 
+enum
+{
+    CMD_IDEL,
+    CMD_KEY,
+    CMD_LED,
+    CMD_REG_UP,
+    CMD_REG_DOWN,
+};
+
+extern volatile _TKS_FLAGA_type bitFlag;
+#define flag10ms bitFlag.bits.b0
+#define flag63ms bitFlag.bits.b1
+#define flag250ms bitFlag.bits.b2
+#define flag500ms bitFlag.bits.b3
+
 #endif

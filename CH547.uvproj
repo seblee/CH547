@@ -324,7 +324,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\BSP;.\USER</IncludePath>
+              <IncludePath>.\BSP;.\USER;.\OPT</IncludePath>
             </VariousControls>
           </C51>
           <Ax51>
@@ -381,11 +381,6 @@
               <FileType>1</FileType>
               <FilePath>.\USER\Main.C</FilePath>
             </File>
-            <File>
-              <FileName>beep.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\USER\beep.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -420,6 +415,31 @@
               <FileName>PWM.C</FileName>
               <FileType>1</FileType>
               <FilePath>.\BSP\PWM\PWM.C</FilePath>
+            </File>
+            <File>
+              <FileName>UART.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\BSP\UART\UART.C</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Opt</GroupName>
+          <Files>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\OPT\beep.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\OPT\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>serial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\OPT\serial.c</FilePath>
             </File>
           </Files>
         </Group>

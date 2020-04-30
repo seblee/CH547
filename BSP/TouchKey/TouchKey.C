@@ -147,27 +147,20 @@ UINT16 Default_TouchKey(UINT8 ch, UINT8 cpw)
     return (IntCurValue);
 }
 
-#if EN_ADC_INT
-
-/*******************************************************************************
-* Function Name  : TouchKeychannelSelect
-* Description    : 触摸按键初始化
-* Input          : 通道号选择ch:0~15,分别对应P10~P17、P00~P07
-                   充电脉冲宽度 cpw:0~127
-                   cpw由 外部触摸按键电容、VDD电压、主频三者决定。
-                   计算公式：count=(Ckey+Cint)*0.7VDD/ITKEY/(2/Fsys)
-                   TKEY_CTRL=count > 127 ? 127 : count （其中Cint为15pF,ITKEY为50u）
-                   简化公式：cpw = （Ckey+15）*0.35*VDD*Fsys/50
-                   cpw = cpw>127?127:cpw
-* Output         : None
-* Return         : 返回触摸检测电压
-*******************************************************************************/
-void TouchKeychannelSelect(UINT8 cpw)
+void touchKeyGet(void)
 {
-    P0_DIR_PU &= ~(1 << (keyChannel - 8));
-    ADC_CHAN = ADC_CHAN & (~MASK_ADC_CHAN) | keyChannel;  //外部通道选择
-    //电容较大时可以先设置IO低，然后恢复浮空输入实现手工放电，≤0.2us
-    TKEY_CTRL = cpw;  //充电脉冲宽度配置，仅低7位有效（同时清除bADC_IF，启动一次TouchKey）
+    if (ADC_CTRL & bADC_IF)
+    {
+        ADC_CTRL             = bADC_IF;  //清除ADC转换完成中断标志
+        IntCurValue          = (ADC_DAT & 0xFFF);
+        Keyvalue[keyChannel] = Buf_UpData_Filter(&KeyBuf[keyChannel][0], IntCurValue);
+        P0_DIR_PU |= 1 << (keyChannel - 8);
+        P0 &= ~(1 << (keyChannel - 8));
+        keyChannel++;
+        if (keyChannel == 12)
+            keyChannel = 8;
+        TouchKeychannelSelect(CPW_Table[keyChannel]);
+    }
 }
 
 void getKeyBitMap(void)
@@ -221,6 +214,28 @@ void getKeyBitMap(void)
     }
 }
 
+/*******************************************************************************
+* Function Name  : TouchKeychannelSelect
+* Description    : 触摸按键初始化
+* Input          : 通道号选择ch:0~15,分别对应P10~P17、P00~P07
+                   充电脉冲宽度 cpw:0~127
+                   cpw由 外部触摸按键电容、VDD电压、主频三者决定。
+                   计算公式：count=(Ckey+Cint)*0.7VDD/ITKEY/(2/Fsys)
+                   TKEY_CTRL=count > 127 ? 127 : count （其中Cint为15pF,ITKEY为50u）
+                   简化公式：cpw = （Ckey+15）*0.35*VDD*Fsys/50
+                   cpw = cpw>127?127:cpw
+* Output         : None
+* Return         : 返回触摸检测电压
+*******************************************************************************/
+void TouchKeychannelSelect(UINT8 cpw)
+{
+    P0_DIR_PU &= ~(1 << (keyChannel - 8));
+    ADC_CHAN = ADC_CHAN & (~MASK_ADC_CHAN) | keyChannel;  //外部通道选择
+    //电容较大时可以先设置IO低，然后恢复浮空输入实现手工放电，≤0.2us
+    TKEY_CTRL = cpw;  //充电脉冲宽度配置，仅低7位有效（同时清除bADC_IF，启动一次TouchKey）
+}
+
+#if EN_ADC_INT
 void touchKeyInterrupt(void) interrupt INT_NO_ADC
 {
     if (ADC_CTRL & bADC_IF)

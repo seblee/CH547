@@ -6,7 +6,7 @@
 #define   UART1_INTERRUPT                           //定义是否开启串口1中断
 #define   UART1_BUAD           115200               //串口1波特率配置
 /* UART2相关 */
-#define   UART2_INTERRUPT                           //定义是否开启串口2中断
+//#define   UART2_INTERRUPT                           //定义是否开启串口2中断
 #define   UART2_BUAD           115200               //串口2波特率配置
 /* UART3相关 */
 //#define   UART3_INTERRUPT                           //定义是否开启串口3中断

@@ -8,12 +8,12 @@
 *******************************************************************************/
 #include ".\Public\CH547.H"
 #include ".\Public\DEBUG.H"
-#include ".\GPIO\GPIO.H"
 #include ".\Timer\Timer.H"
 #include ".\TouchKey\TouchKey.H"
-#include ".\UART\UART.H"
 #include "beep.h"
 #include "user_type.h"
+#include "serial.h"
+#include "led.h"
 
 #pragma NOAREGS
 // sbit LED2 = P2 ^ 2;
@@ -22,10 +22,7 @@ sbit LED4 = P2 ^ 4;
 sbit LED5 = P2 ^ 5;
 
 volatile _TKS_FLAGA_type bitFlag;
-#define flag10ms bitFlag.bits.b0
-#define flag63ms bitFlag.bits.b1
-#define flag250ms bitFlag.bits.b2
-#define flag500ms bitFlag.bits.b3
+
 /*******************************************************************************
  * Function Name  : LED_Port_Init
  * Description    : LED引脚初始化,推挽输出
@@ -34,17 +31,6 @@ volatile _TKS_FLAGA_type bitFlag;
  * Output         : None
  * Return         : None
  *******************************************************************************/
-void LED_Port_Init(void)
-{
-    P2 |= (0xF << 2);  //默认熄灭
-    P2_MOD_OC &= ~(0xF << 2);
-    P2_DIR_PU |= (0xF << 2);
-
-    LED3 = 1;
-    LED4 = 1;
-    LED5 = 1;
-}
-
 void getBitFlag(void)
 {
     if (flag10)
@@ -89,6 +75,7 @@ void main()
 #endif
     TouchKey_Init();
     beepInit();
+    serialInit();
 
     while (1)
     {
@@ -99,19 +86,20 @@ void main()
         if (flag10ms)
         {
             getKeyBitMap();
+            if (KEY2)
+            {
+                printf("key2\n");
+                beepLongCount += 1;
+            }
         }
-        if (flag63ms)
-        {
-            beepShortBee();
-        }
+        beepShortBee();
+        serialOpt();
+        touchKeyGet();
         if (flag250ms)
         {
             CH547WDTFeed(0);
         }
-        if (flag500ms)
-        {
-            LED5 = ~LED5;
-        }
+        ledDisplay();
         if (bitFlag.byte)
         {
             bitClear();
