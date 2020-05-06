@@ -22,7 +22,7 @@ bit beepFlag = 0;
 _BEEP_STATE beepState = {0, 0, 0};
 
 UINT8 beepCount     = 3;
-UINT8 beepLongCount = 5;
+UINT8 beepLongCount = 0;
 
 void beepInit(void)
 {

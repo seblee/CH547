@@ -81,6 +81,7 @@ void main()
     {
         if (flag1ms)
         {
+            flag1ms = 0;
             getBitFlag();
         }
         if (flag10ms)
@@ -89,7 +90,6 @@ void main()
             if (KEY2)
             {
                 printf("key2\n");
-                beepLongCount += 1;
             }
         }
         beepShortBee();

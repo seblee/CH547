@@ -117,6 +117,7 @@ void CAP2Init(UINT8 mode)
 void timer0Init(void)
 {
     printf("T0 Test ...\n");
+    PT0 = 1;
     mTimer0Clk12DivFsys();      // T0定时器时钟设置 FREQ_SYS/12
     mTimer_x_ModInit(0, 1);     // T0 定时器模式设置 模式1 16位定时器
     mTimer_x_SetData(0, 2000);  // T0定时器赋值 24MHZ 1MS中断

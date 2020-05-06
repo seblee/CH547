@@ -18,6 +18,7 @@
 #include "serial.h"
 #include "led.h"
 #include "beep.h"
+#include ".\TouchKey\TouchKey.H"
 
 UINT8 rxCount            = 0;
 UINT8 rxStep             = 0;
@@ -25,6 +26,7 @@ UINT8 rxBuff[30]         = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
 UINT8 txBuff[30]         = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'a'};
 UINT8 txCount            = 10;
 bit txComplete           = 1;
+bit rxDone               = 1;
 UINT8C protocolHeader[2] = {0xff, 0xa5};
 
 void serialInit(void)
@@ -38,10 +40,34 @@ void serialOpt(void)
     serialSend();
     serialRxReceive();
 }
-
+UINT8 getCheckSum(UINT8* dat)
+{
+    UINT8 checkSum = 0;
+    UINT8 i;
+    for (i = 0; i < (*(dat + 3) + 4); i++)
+    {
+        checkSum += *(dat + i);
+    }
+    return checkSum;
+}
 void serialSend(void)
 {
     static UINT8 index = 0;
+
+    if (rxDone && (txCount == 0))
+    {
+        rxDone    = 0;
+        txBuff[0] = 0xff;
+        txBuff[1] = 0xa5;
+        txBuff[2] = CMD_KEY;
+        txBuff[3] = 0x04;
+        txBuff[4] = k_count[0];
+        txBuff[5] = (k_count[0] >> 8);
+        txBuff[6] = k_count[1];
+        txBuff[7] = (k_count[1] >> 8);
+        txBuff[8] = 0;  // getCheckSum(txBuff);
+        txCount   = 9;
+    }
 
     if (SIF1 & bU1TI)
     {
@@ -59,23 +85,6 @@ void serialSend(void)
         }
         txComplete = 0;
     }
-    if ((rxCount > 7) && (txCount == 0))
-    {
-        memcpy(txBuff, rxBuff, rxCount);
-        txCount = rxCount;
-        rxCount = 0;
-    }
-}
-
-UINT8 getCheckSum(UINT8* dat)
-{
-    UINT8 checkSum = 0;
-    UINT8 i;
-    for (i = 0; i < (*(dat + 3) + 4); i++)
-    {
-        checkSum += *(dat + i);
-    }
-    return checkSum;
 }
 
 void serialRxReceive(void)
@@ -121,11 +130,10 @@ again:
         {
             UINT8 len = rxBuff[3] + 5;
             serialRxProcess(rxBuff);
-
-            rxStep = 0;
             memcpy(rxBuff, rxBuff + len, rxCount - len);
             rxCount -= len;
             rxStep = 0;
+            rxDone = 1;
         }
         else
         {

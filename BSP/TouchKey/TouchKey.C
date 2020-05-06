@@ -19,7 +19,7 @@ UINT8C CPW_Table[16] = {30, 30, 30, 30, 30, 30, 30, 30,  //Óë°å¼äµçÈÝÓÐ¹ØµÄ²ÎÊý£
                         30, 30, 30, 30, 30, 30, 30, 30};
 UINT8 keyTime[16]    = {0};
 UINT16 keyData       = 0;
-volatile _TKS_FLAGA16_type keyTrg[2], keyState;
+volatile _TKS_FLAGA16_type keyTrg[2];
 UINT16 k_count[2];
 
 #define RESTAIN_TIMES 200  // 200 ¡Á 10ms = 2s
@@ -166,26 +166,25 @@ void touchKeyGet(void)
 void getKeyBitMap(void)
 {
     UINT8 i;
-    UINT16 keyRestain = 0;
+    UINT16 keyState = 0;
     UINT16 err;  //´¥ÃþÄ£Äâ±ä»¯²îÖµ
-    keyState.word = 0;
     for (i = 8; i < 12; i++)
     {
         err = abs(Keyvalue[i] - PowerValue[i]);
         if (err > DOWM_THRESHOLD_VALUE)
-            keyState.word |= (1 << i);
+            keyState |= (1 << i);
         if (err < UP_THRESHOLD_VALUE)
-            keyState.word &= ~(1 << i);
+            keyState &= ~(1 << i);
     }
 
-    keyTrg[0].word = keyState.word & (keyState.word ^ k_count[0]);
-    k_count[0]     = keyState.word;
+    keyTrg[0].word = keyState & (keyState ^ k_count[0]);
+    k_count[0]     = keyState;
 
     if (keyTrg[0].word)
     {
         beepCount++;
     }
-
+    keyState = 0;
     for (i = 8; i < 12; i++)
     {
         if (k_count[0] & (1 << i))
@@ -193,7 +192,7 @@ void getKeyBitMap(void)
             if (keyTime[i] < RESTAIN_TIMES)
                 keyTime[i]++;
             else
-                keyRestain |= (1 << i);
+                keyState |= (1 << i);
         }
         else
         {
@@ -203,11 +202,11 @@ void getKeyBitMap(void)
             //     Key_Up_Trg &= (~(1 << i));
 
             keyTime[i] = 0;
-            keyRestain &= (~(1 << i));
+            keyState &= (~(1 << i));
         }
     }
-    keyTrg[1].word = keyRestain & (keyRestain ^ k_count[1]);
-    k_count[1]     = keyRestain;
+    keyTrg[1].word = keyState & (keyState ^ k_count[1]);
+    k_count[1]     = keyState;
     if (keyTrg[1].word)
     {
         beepCount++;
