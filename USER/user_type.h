@@ -41,11 +41,7 @@ typedef union
     _FLAG_bits bits;
     unsigned char byte;
 } _TKS_FLAGA_type;
-enum
-{
-    LED_ON,
-    LED_OFF,
-};
+
 enum
 {
     STATE_LED_OFF,

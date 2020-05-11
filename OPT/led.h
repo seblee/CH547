@@ -21,6 +21,26 @@
 #include ".\GPIO\GPIO.H"
 #include "user_type.h"
 
+typedef enum
+{
+    LEDON   = 0,
+    LED_ON  = 0,
+    LED_OFF = 1,
+    LEDOFF  = !LEDON,
+} ledState_t;
+enum
+{
+    LEDNUM0 = 0,
+    LEDNUM1 = 1,
+    LEDNUM2 = 2,
+    LEDNUM3 = 3,
+    LEDNUM4 = 4,
+    LEDNUM5 = 5,
+    LEDNUM6 = 6,
+    LEDNUM7 = 7,
+    LEDNUM8 = 8,
+};
+
 extern volatile _USR_FLAGA_type ledState[4];
 #define led1State ledState[0].s4bits.s0
 #define led2State ledState[0].s4bits.s1
@@ -34,5 +54,6 @@ extern volatile _USR_FLAGA_type ledState[4];
 
 void LED_Port_Init(void);
 void ledDisplay(void);
+void ledSetState(UINT8 num, ledState_t state);
 
 #endif

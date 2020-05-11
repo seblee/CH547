@@ -22,11 +22,11 @@
 
 UINT8 rxCount            = 0;
 UINT8 rxStep             = 0;
-UINT8 rxBuff[30]         = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
-UINT8 txBuff[30]         = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'a'};
-UINT8 txCount            = 10;
+UINT8 rxBuff[30]         = {0};
+UINT8 txBuff[30]         = {0};
+UINT8 txCount            = 0;
 bit txComplete           = 1;
-bit rxDone               = 1;
+bit rxDone               = 0;
 UINT8C protocolHeader[2] = {0xff, 0xa5};
 
 void serialInit(void)
@@ -65,7 +65,7 @@ void serialSend(void)
         txBuff[5] = (k_count[0] >> 8);
         txBuff[6] = k_count[1];
         txBuff[7] = (k_count[1] >> 8);
-        txBuff[8] = 0;  // getCheckSum(txBuff);
+        txBuff[8] = getCheckSum(txBuff);
         txCount   = 9;
     }
 
