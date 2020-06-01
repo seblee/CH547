@@ -16,10 +16,6 @@
 #include "led.h"
 
 #pragma NOAREGS
-// sbit LED2 = P2 ^ 2;
-sbit LED3 = P2 ^ 3;
-sbit LED4 = P2 ^ 4;
-sbit LED5 = P2 ^ 5;
 
 volatile _TKS_FLAGA_type bitFlag;
 

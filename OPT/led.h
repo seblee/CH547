@@ -30,18 +30,22 @@ typedef enum
 } ledState_t;
 enum
 {
-    LEDNUM0 = 0,
-    LEDNUM1 = 1,
-    LEDNUM2 = 2,
-    LEDNUM3 = 3,
-    LEDNUM4 = 4,
-    LEDNUM5 = 5,
-    LEDNUM6 = 6,
-    LEDNUM7 = 7,
-    LEDNUM8 = 8,
+    LEDNUM0  = 0,
+    LEDNUM1  = 1,
+    LEDNUM2  = 2,
+    LEDNUM3  = 3,
+    LEDNUM4  = 4,
+    LEDNUM5  = 5,
+    LEDNUM6  = 6,
+    LEDNUM7  = 7,
+    LEDNUM8  = 8,
+    LEDNUM9  = 9,
+    LEDNUM10 = 10,
+    LEDNUM11 = 11,
 };
+#define LEDNUM 11
 
-extern volatile _USR_FLAGA_type ledState[4];
+extern volatile _USR_FLAGA_type ledState[6];
 #define led1State ledState[0].s4bits.s0
 #define led2State ledState[0].s4bits.s1
 #define led3State ledState[1].s4bits.s0

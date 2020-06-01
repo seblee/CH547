@@ -16,26 +16,44 @@
  **/
 #include "led.h"
 
-volatile _USR_FLAGA_type ledState[4];
-UINT8 ledFlashFast[8]     = {0};
-volatile UINT8 flashCount = 0;
+volatile _USR_FLAGA_type ledState[6];
+UINT8 ledFlashFast[LEDNUM] = {0};
 
 bit flashFlag_0_5HZ;
 bit flashFlag_1HZ;
 bit flashFlag_2HZ;
 
-// sbit LED2 = P2 ^ 2;
-sbit LED3 = P2 ^ 3;
-sbit LED4 = P2 ^ 4;
-sbit LED5 = P2 ^ 5;
+sbit LED0  = P3 ^ 4;
+sbit LED1  = P3 ^ 5;
+sbit LED2  = P3 ^ 6;
+sbit LED3  = P3 ^ 7;
+sbit LED4  = P4 ^ 3;
+sbit LED5  = P4 ^ 2;
+sbit LED6  = P4 ^ 6;
+sbit LED7  = P4 ^ 1;
+sbit LED8  = P4 ^ 0;
+sbit LED9  = P2 ^ 0;
+sbit LED10 = P2 ^ 1;
 
 UINT16 ledValue = 0;
 
 void LED_Port_Init(void)
 {
-    P2 |= (0xF << 2);  //Ä¬ÈÏÏ¨Ãð
-    P2_MOD_OC &= ~(0xF << 2);
-    P2_DIR_PU |= (0xF << 2);
+    P2 |= 0x03;  //Ä¬ÈÏÏ¨Ãð
+    P2_MOD_OC &= ~0x03;
+    P2_DIR_PU |= 0x03;
+
+    P3 |= 0xf0;  //Ä¬ÈÏÏ¨Ãð
+    P3_MOD_OC &= ~0xf0;
+    P3_DIR_PU |= 0xf0;
+
+    P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
+    P4_MOD_OC &= ~0x4f;
+    P4_DIR_PU |= 0x4f;
+
+    P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
+    P4_MOD_OC &= ~0x4f;
+    P4_DIR_PU |= 0x4f;
 }
 
 void ledDisplay(void)
@@ -78,7 +96,7 @@ void ledDisplay(void)
         }
     }
 
-    for (i = 3; i < 5; i++)
+    for (i = 0; i < LEDNUM; i++)
     {
         value = ((ledValueTemp >> i) & 1);
         if (i % 2 == 0)
@@ -500,13 +518,34 @@ void ledSetState(UINT8 num, ledState_t state)
     switch (num)
     {
         case LEDNUM0:
-            // if(state==LEDON){LED0=LED_ON;}else{LED0=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED0 = LED_ON;
+            }
+            else
+            {
+                LED0 = LED_OFF;
+            }
             break;
         case LEDNUM1:
-            // if(state==LEDON){LED1=LED_ON;}else{LED1=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED1 = LED_ON;
+            }
+            else
+            {
+                LED1 = LED_OFF;
+            }
             break;
         case LEDNUM2:
-            // if(state==LEDON){LED2=LED_ON;}else{LED2=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED2 = LED_ON;
+            }
+            else
+            {
+                LED2 = LED_OFF;
+            }
             break;
         case LEDNUM3:
             if (state == LEDON)
@@ -533,13 +572,54 @@ void ledSetState(UINT8 num, ledState_t state)
             // LED5 = state;
             break;
         case LEDNUM6:
-            // if(state==LEDON){LED6=LED_ON;}else{LED6=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED6 = LED_ON;
+            }
+            else
+            {
+                LED6 = LED_OFF;
+            }
             break;
         case LEDNUM7:
-            // if(state==LEDON){LED7=LED_ON;}else{LED7=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED7 = LED_ON;
+            }
+            else
+            {
+                LED7 = LED_OFF;
+            }
             break;
         case LEDNUM8:
-            // if(state==LEDON){LED8=LED_ON;}else{LED8=LED_OFF;}
+            if (state == LEDON)
+            {
+                LED8 = LED_ON;
+            }
+            else
+            {
+                LED8 = LED_OFF;
+            }
+            break;
+        case LEDNUM9:
+            if (state == LEDON)
+            {
+                LED8 = LED_ON;
+            }
+            else
+            {
+                LED8 = LED_OFF;
+            }
+            break;
+        case LEDNUM10:
+            if (state == LEDON)
+            {
+                LED8 = LED_ON;
+            }
+            else
+            {
+                LED8 = LED_OFF;
+            }
             break;
         default:
             break;
