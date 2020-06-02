@@ -12,7 +12,7 @@
 UINT16 Cap_2[2] = {0};
 #endif
 #ifdef T0_INT
-UINT16 counter1Ms = 0;
+UINT32 counter1Ms = 0;
 bit flag1ms;
 bit flag10;
 bit flag63;

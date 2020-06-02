@@ -25,8 +25,8 @@
 #include ".\UART\UART.H"
 #include ".\PWM\PWM.H"
 
-#define beepON SetPWM3Dat(32)
-#define beepOFF SetPWM3Dat(64)
+#define beepON SetPWM3Dat(64)
+#define beepOFF SetPWM3Dat(0)
 typedef struct
 {
     unsigned char mode : 1;
