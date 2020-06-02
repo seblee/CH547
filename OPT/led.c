@@ -16,44 +16,56 @@
  **/
 #include "led.h"
 
-volatile _USR_FLAGA_type ledState[6];
+volatile _USR_FLAGA_type ledState[7];
 UINT8 ledFlashFast[LEDNUM] = {0};
 
 bit flashFlag_0_5HZ;
 bit flashFlag_1HZ;
 bit flashFlag_2HZ;
 
-sbit LED0  = P3 ^ 4;
-sbit LED1  = P3 ^ 5;
-sbit LED2  = P3 ^ 6;
-sbit LED3  = P3 ^ 7;
-sbit LED4  = P4 ^ 3;
-sbit LED5  = P4 ^ 2;
-sbit LED6  = P4 ^ 6;
-sbit LED7  = P4 ^ 1;
-sbit LED8  = P4 ^ 0;
-sbit LED9  = P2 ^ 0;
-sbit LED10 = P2 ^ 1;
-
 UINT16 ledValue = 0;
 
 void LED_Port_Init(void)
 {
+    P1 |= 0x38;  //Ä¬ÈÏÏ¨Ãð
+    P1_MOD_OC &= ~0x38;
+    P1_DIR_PU |= 0x38;
+
     P2 |= 0x03;  //Ä¬ÈÏÏ¨Ãð
     P2_MOD_OC &= ~0x03;
     P2_DIR_PU |= 0x03;
 
-    P3 |= 0xf0;  //Ä¬ÈÏÏ¨Ãð
-    P3_MOD_OC &= ~0xf0;
-    P3_DIR_PU |= 0xf0;
+    P3 |= 0x78;  //Ä¬ÈÏÏ¨Ãð
+    P3_MOD_OC &= ~0x78;
+    P3_DIR_PU |= 0x78;
 
     P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
     P4_MOD_OC &= ~0x4f;
     P4_DIR_PU |= 0x4f;
+}
+void ledGo(void)
+{
+    UINT8 i                    = 0;
+    static UINT16 ledValueTemp = 1;
+    if (flag500ms)
+    {
+        UINT16 ValueTemp = ~ledValueTemp;
+        for (i = 0; i < 14; i++)
+        {
+            if (ValueTemp & (1 << i))
+                ledSetState(i, LED_OFF);
+            else
+            {
+                ledSetState(i, LED_ON);
+            }
+        }
 
-    P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
-    P4_MOD_OC &= ~0x4f;
-    P4_DIR_PU |= 0x4f;
+        ledValueTemp <<= 1;
+        if (ledValueTemp == 0x4000)
+        {
+            ledValueTemp = 1;
+        }
+    }
 }
 
 void ledDisplay(void)
@@ -74,7 +86,6 @@ void ledDisplay(void)
     }
     if (flag500ms)
     {
-        LED5 = ~LED5;
         if (flashFlag_1HZ)
         {
             flashFlag_1HZ = 0;
@@ -176,8 +187,12 @@ void ledDisplay(void)
         }
         if (ledValueTemp ^ ledValue)
         {
-            printf("led%d change\n", (UINT16)i);
-            ledSetState(i, (ledValueTemp & (1 << i)));
+            if (ledValueTemp & (1 << i))
+                ledSetState(i, LED_OFF);
+            else
+            {
+                ledSetState(i, LED_ON);
+            }
         }
         ledValue = ledValueTemp;
     }
@@ -568,8 +583,14 @@ void ledSetState(UINT8 num, ledState_t state)
             }
             break;
         case LEDNUM5:
-            // if(state==LEDON){LED5=LED_ON;}else{LED5=LED_OFF;}
-            // LED5 = state;
+            if (state == LEDON)
+            {
+                LED5 = LED_ON;
+            }
+            else
+            {
+                LED5 = LED_OFF;
+            }
             break;
         case LEDNUM6:
             if (state == LEDON)
@@ -604,21 +625,51 @@ void ledSetState(UINT8 num, ledState_t state)
         case LEDNUM9:
             if (state == LEDON)
             {
-                LED8 = LED_ON;
+                LED9 = LED_ON;
             }
             else
             {
-                LED8 = LED_OFF;
+                LED9 = LED_OFF;
             }
             break;
         case LEDNUM10:
             if (state == LEDON)
             {
-                LED8 = LED_ON;
+                LED10 = LED_ON;
             }
             else
             {
-                LED8 = LED_OFF;
+                LED10 = LED_OFF;
+            }
+            break;
+        case LEDNUM11:
+            if (state == LEDON)
+            {
+                LED11 = LED_ON;
+            }
+            else
+            {
+                LED11 = LED_OFF;
+            }
+            break;
+        case LEDNUM12:
+            if (state == LEDON)
+            {
+                LED12 = LED_ON;
+            }
+            else
+            {
+                LED12 = LED_OFF;
+            }
+            break;
+        case LEDNUM13:
+            if (state == LEDON)
+            {
+                LED13 = LED_ON;
+            }
+            else
+            {
+                LED13 = LED_OFF;
             }
             break;
         default:

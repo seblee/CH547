@@ -14,7 +14,7 @@ UINT16 IntCurValue = 0;  //中断采集到的当前值
 UINT16 KeyBuf[16][KEY_BUF_LEN];
 UINT16 PowerValue[16];
 UINT16 Keyvalue[16];
-UINT8 keyChannel     = 8;
+UINT8 keyChannel     = 0;
 UINT8C CPW_Table[16] = {30, 30, 30, 30, 30, 30, 30, 30,  //与板间电容有关的参数，分别对应每个按键
                         30, 30, 30, 30, 30, 30, 30, 30};
 UINT8 keyTime[16]    = {0};
@@ -35,6 +35,8 @@ void TouchKey_Init(void)
     // Touch采样通道设置为高阻输入
     P0_MOD_OC &= 0xF0;  // P00 P01 P02 P03高阻输入
     P0_DIR_PU &= 0xF0;
+    P1_MOD_OC &= 0xF8;  // P10 P11 P12 高阻输入
+    P1_DIR_PU &= 0xF8;
     ADC_CFG |= (bADC_EN | bADC_AIN_EN);             //开启ADC模块电源,选择外部通道
     ADC_CFG  = ADC_CFG & ~(bADC_CLK0 | bADC_CLK1);  //选择ADC参考时钟
     ADC_CHAN = (3 << 4);                            //默认选择外部通道0
@@ -53,6 +55,11 @@ void touchKeyFirstValue(void)
 {
     UINT8 ch;
     /* 获取按键初值 */
+    for (ch = 0; ch != 3; ch++)
+    {
+        PowerValue[ch] = Default_TouchKey(ch, CPW_Table[ch]);
+        printf(" Y%d ", PowerValue[ch]);
+    }
     for (ch = 8; ch != 12; ch++)
     {
         PowerValue[ch] = Default_TouchKey(ch, CPW_Table[ch]);
@@ -154,11 +161,21 @@ void touchKeyGet(void)
         ADC_CTRL             = bADC_IF;  //清除ADC转换完成中断标志
         IntCurValue          = (ADC_DAT & 0xFFF);
         Keyvalue[keyChannel] = Buf_UpData_Filter(&KeyBuf[keyChannel][0], IntCurValue);
-        P0_DIR_PU |= 1 << (keyChannel - 8);
-        P0 &= ~(1 << (keyChannel - 8));
+        if (keyChannel >= 8)
+        {
+            P0_DIR_PU |= 1 << (keyChannel - 8);
+            P0 &= ~(1 << (keyChannel - 8));
+        }
+        else
+        {
+            P1_DIR_PU |= 1 << keyChannel;
+            P1 &= ~(1 << keyChannel);
+        }
         keyChannel++;
-        if (keyChannel == 12)
+        if (keyChannel == 3)
             keyChannel = 8;
+        if (keyChannel == 12)
+            keyChannel = 0;
         TouchKeychannelSelect(CPW_Table[keyChannel]);
     }
 }
@@ -168,13 +185,33 @@ void getKeyBitMap(void)
     UINT8 i;
     UINT16 keyState = 0;
     UINT16 err;  //触摸模拟变化差值
+    for (i = 0; i < 3; i++)
+    {
+        err = abs(Keyvalue[i] - PowerValue[i]);
+        if (err > DOWM_THRESHOLD_VALUE)
+        {
+            // printf("i %d pressed,value:%d\n", (UINT16)i, Keyvalue[i]);
+            keyState |= (1 << i);
+        }
+        if (err < UP_THRESHOLD_VALUE)
+        {
+            // printf("i %d up,value:%d\n", (UINT16)i, Keyvalue[i]);
+            keyState &= ~(1 << i);
+        }
+    }
     for (i = 8; i < 12; i++)
     {
         err = abs(Keyvalue[i] - PowerValue[i]);
         if (err > DOWM_THRESHOLD_VALUE)
+        {
             keyState |= (1 << i);
+            // printf("i %d pressed,value:%d\n", (UINT16)i, Keyvalue[i]);
+        }
         if (err < UP_THRESHOLD_VALUE)
+        {
+            // printf("i %d up,value:%d\n", (UINT16)i, Keyvalue[i]);
             keyState &= ~(1 << i);
+        }
     }
 
     keyTrg[0].word = keyState & (keyState ^ k_count[0]);
@@ -185,7 +222,7 @@ void getKeyBitMap(void)
         beepCount++;
     }
     keyState = 0;
-    for (i = 8; i < 12; i++)
+    for (i = 0; i < 12; i++)
     {
         if (k_count[0] & (1 << i))
         {
@@ -228,7 +265,15 @@ void getKeyBitMap(void)
 *******************************************************************************/
 void TouchKeychannelSelect(UINT8 cpw)
 {
-    P0_DIR_PU &= ~(1 << (keyChannel - 8));
+    if (keyChannel >= 8)
+    {
+        P0_DIR_PU &= ~(1 << (keyChannel - 8));
+    }
+    else
+    {
+        P1_DIR_PU &= ~(1 << keyChannel);
+    }
+
     ADC_CHAN = ADC_CHAN & (~MASK_ADC_CHAN) | keyChannel;  //外部通道选择
     //电容较大时可以先设置IO低，然后恢复浮空输入实现手工放电，≤0.2us
     TKEY_CTRL = cpw;  //充电脉冲宽度配置，仅低7位有效（同时清除bADC_IF，启动一次TouchKey）

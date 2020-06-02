@@ -42,10 +42,28 @@ enum
     LEDNUM9  = 9,
     LEDNUM10 = 10,
     LEDNUM11 = 11,
+    LEDNUM12 = 12,
+    LEDNUM13 = 13,
 };
-#define LEDNUM 11
 
-extern volatile _USR_FLAGA_type ledState[6];
+sbit LED0  = P3 ^ 3;
+sbit LED1  = P3 ^ 4;
+sbit LED2  = P3 ^ 5;
+sbit LED3  = P3 ^ 6;
+sbit LED4  = P4 ^ 3;
+sbit LED5  = P4 ^ 2;
+sbit LED6  = P4 ^ 6;
+sbit LED7  = P4 ^ 1;
+sbit LED8  = P4 ^ 0;
+sbit LED9  = P2 ^ 0;
+sbit LED10 = P2 ^ 1;
+sbit LED11 = P1 ^ 5;
+sbit LED12 = P1 ^ 4;
+sbit LED13 = P1 ^ 3;
+
+#define LEDNUM 14
+
+extern volatile _USR_FLAGA_type ledState[7];
 #define led1State ledState[0].s4bits.s0
 #define led2State ledState[0].s4bits.s1
 #define led3State ledState[1].s4bits.s0
@@ -55,9 +73,15 @@ extern volatile _USR_FLAGA_type ledState[6];
 #define led7State ledState[3].s4bits.s0
 #define led8State ledState[3].s4bits.s1
 #define led9State ledState[4].s4bits.s0
+#define led10State ledState[4].s4bits.s1
+#define led11State ledState[5].s4bits.s0
+#define led12State ledState[5].s4bits.s1
+#define led13State ledState[6].s4bits.s0
+#define led14State ledState[6].s4bits.s1
 
 void LED_Port_Init(void);
 void ledDisplay(void);
+void ledGo(void);
 void ledSetState(UINT8 num, ledState_t state);
 
 #endif

@@ -143,6 +143,7 @@ void CH549UART2SendByte(UINT8 SendDat)
     SIF2 = bU2TI;                                                          //清除发送完成中断
 }
 #ifdef UART2_INTERRUPT
+void serialRx(UINT8 dat); 
 /*******************************************************************************
 * Function Name  : UART1Interrupt(void)
 * Description    : UART1 中断服务程序
@@ -154,7 +155,7 @@ void UART2Interrupt( void ) interrupt INT_NO_UART2 using 1                //串口
     {
         SIF2 = bU2RI;                                                     //清除接收完中断
         dat = SBUF2;
-        CH549UART2SendByte(dat);
+        serialRx(dat);
     }
 }
 #endif

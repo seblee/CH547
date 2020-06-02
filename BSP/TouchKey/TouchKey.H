@@ -49,6 +49,10 @@ extern UINT8 beepCount;
 #define KEY3 keyTrg[0].bits.b9
 #define KEY4 keyTrg[0].bits.b8
 
+#define KEY5 keyTrg[0].bits.b2
+#define KEY6 keyTrg[0].bits.b1
+#define KEY7 keyTrg[0].bits.b0
+
 #define KEY1Restan keyTrg[1].bits.b11
 #define KEY2Restan keyTrg[1].bits.b10
 #define KEY3Restan keyTrg[1].bits.b9

@@ -31,8 +31,10 @@ UINT8C protocolHeader[2] = {0xff, 0xa5};
 
 void serialInit(void)
 {
-    IP_EX |= bIP_UART1;
-    CH549UART1Init();
+    // IP_EX |= bIP_UART1;
+    // CH549UART1Init();
+    IP_EX |= bIP_UART2;
+    CH549UART2Init();
 }
 
 void serialOpt(void)
@@ -69,15 +71,15 @@ void serialSend(void)
         txCount   = 9;
     }
 
-    if (SIF1 & bU1TI)
+    if (SIF2 & bU2TI)
     {
-        SIF1       = bU1TI;  //清除接收完中断
+        SIF2       = bU2TI;  //清除接收完中断
         txComplete = 1;
     }
 
     if (txComplete && (index < txCount))
     {
-        SBUF1 = txBuff[index++];
+        SBUF2 = txBuff[index++];
         if (index == txCount)
         {
             index   = 0;
@@ -157,16 +159,18 @@ void serialRxProcess(UINT8* serialDataIn)
 {
     switch (*(serialDataIn + 2))
     {
+        UINT8 i;
         case CMD_IDEL:
             break;
         case CMD_KEY:
             break;
         case CMD_LED:
-            beepState.byte   = *(serialDataIn + 4);
-            ledState[0].byte = *(serialDataIn + 5);
-            ledState[1].byte = *(serialDataIn + 6);
-            ledState[2].byte = *(serialDataIn + 7);
-            ledState[3].byte = *(serialDataIn + 8);
+            printf("CMD_LED\n");
+            beepState.byte = *(serialDataIn + 4);
+            for (i = 0; i < (*(serialDataIn + 3) - 1); i++)
+            {
+                ledState[i].byte = *(serialDataIn + 5 + i);
+            }
 
             if (BEEPMODE)
             {
