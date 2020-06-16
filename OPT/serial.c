@@ -27,12 +27,15 @@ UINT8 txBuff[30]         = {0};
 UINT8 txCount            = 0;
 bit txComplete           = 1;
 bit rxDone               = 0;
+bit bleDataReday         = 0;
 UINT8C protocolHeader[2] = {0xff, 0xa5};
+
+UINT8 BleDataTemp[20] = {0};
+volatile _TKS_FLAGA_type boardFlag;
+#define boardBLEFlag boardFlag.bits.b0
 
 void serialInit(void)
 {
-    // IP_EX |= bIP_UART1;
-    // CH549UART1Init();
     IP_EX |= bIP_UART2;
     CH549UART2Init();
 }
@@ -52,23 +55,39 @@ UINT8 getCheckSum(UINT8* dat)
     }
     return checkSum;
 }
+
+void refreshTxData(void)
+{
+    txBuff[0] = 0xff;
+    txBuff[1] = 0xa5;
+    txBuff[2] = CMD_KEY;
+    txBuff[3] = 0x05;
+    txBuff[4] = boardFlag.byte;
+    txBuff[5] = k_count[0];
+    txBuff[6] = (k_count[0] >> 8);
+    txBuff[7] = k_count[1];
+    txBuff[8] = (k_count[1] >> 8);
+    txBuff[9] = getCheckSum(txBuff);
+}
+
 void serialSend(void)
 {
     static UINT8 index = 0;
 
     if (flag63ms && (txCount == 0))
     {
-        rxDone    = 0;
-        txBuff[0] = 0xff;
-        txBuff[1] = 0xa5;
-        txBuff[2] = CMD_KEY;
-        txBuff[3] = 0x04;
-        txBuff[4] = k_count[0];
-        txBuff[5] = (k_count[0] >> 8);
-        txBuff[6] = k_count[1];
-        txBuff[7] = (k_count[1] >> 8);
-        txBuff[8] = getCheckSum(txBuff);
-        txCount   = 9;
+        if (bleDataReday)
+        {
+            bleDataReday = 0;
+            memcpy(txBuff + 2, BleDataTemp + 2, 18);
+            memset(BleDataTemp, 0, 20);
+        }
+        else
+        {
+            refreshTxData();
+        }
+        txCount = txBuff[3] + 5;
+        rxDone  = 0;
     }
 
     if (SIF2 & bU2TI)
