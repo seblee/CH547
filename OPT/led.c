@@ -16,14 +16,14 @@
  **/
 #include "led.h"
 
-volatile _USR_FLAGA_type ledState[7];
-UINT8 ledFlashFast[LEDNUM] = {0};
+volatile _USR_FLAGA_type ledState[7] = {0};
+UINT8 ledFlashFast[LEDNUM]           = {0};
 
 bit flashFlag_0_5HZ;
 bit flashFlag_1HZ;
 bit flashFlag_2HZ;
 
-UINT16 ledValue = 0;
+static UINT16 ledValue = 0;
 
 void LED_Port_Init(void)
 {

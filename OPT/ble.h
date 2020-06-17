@@ -50,4 +50,8 @@ typedef enum
     BLE_TRANSMISSION,
 } ble_cmd_t;
 
+void ble(void);
+void bleInit(void);
+void bleUart1DataIn(UINT8 dat);
+
 #endif  //__BLE_H_

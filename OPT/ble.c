@@ -23,22 +23,24 @@ static UINT8 rxStep        = 0;
 static UINT8 txBuff[30]    = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
 static UINT8 rxBuff[RXMAX] = {0};
 static UINT8 txCount       = 0;
-static UINT8 txCountBak    = 0;
 
 static UINT16 delayCount    = 0;
 static ble_cmd_t bleCmdType = BLE_PPP;
 
 static char bleAddr[30] = {0};
 static char bleName[30] = {0};
-bit timeToTrans         = 0;
-bit BLEInit             = 0;
-bit commandMode         = 0;
-bit commandOK           = 0;
-bit uartGetflag         = 0;
-bit uartRecOK           = 0;
-bit regDataOk           = 0;
-bit uartGetflag         = 0;
-bit uartGetflag         = 0;
+bit timeToTransFlag     = 0;
+bit bleInitFlag         = 0;
+bit commandModeFlag     = 0;
+bit commandOKFlag       = 0;
+bit uartGetFlag         = 0;
+bit uartRecOKFlag       = 0;
+bit regDataOkFlag       = 0;
+bit txCompleteFlag      = 1;
+
+sbit BLE_ON  = P2 ^ 5;
+sbit UART_SW = P2 ^ 3;
+sbit PWR_ON  = P2 ^ 4;
 
 extern UINT8C protocolHeader[2];
 
@@ -62,36 +64,79 @@ const cmd_map_st AT_command[17] = {
     {"AT+help\r\n", "AT+", ""},                                 // BLE_HELP
 };
 
+void bleRxProcess(void);
+void blePushCmdSendBuff(ble_cmd_t cmd, const char *dat);
+void bleInitialization();
+UINT8 getCheckSum(UINT8 *dat);
+
 void bleInit(void)
 {
+    GPIO_Init(PORT2, PIN5, MODE0);         // BLE_ON
+    GPIO_Init(PORT2, PIN4 | PIN4, MODE1);  // UART_SW  PWR_ON
+    UART_SW = 1;
+    PWR_ON  = 1;
+
     IP_EX |= bIP_UART1;
     CH549UART1Init();
 }
 
+void bleUart1DataIn(UINT8 dat)
+{
+    if (rxCount < RXMAX)
+    {
+        rxBuff[rxCount] = dat;
+        rxCount++;
+        uartGetFlag = 1;
+    }
+}
+void bleSend(void)
+{
+    static UINT8 index = 0;
+    if (SIF1 & bU1TI)
+    {
+        SIF1           = bU1TI;  //清除接收完中断
+        txCompleteFlag = 1;
+    }
+
+    if (txCompleteFlag && (index < txCount))
+    {
+        SBUF1 = txBuff[index++];
+        if (index == txCount)
+        {
+            index   = 0;
+            txCount = 0;
+        }
+        txCompleteFlag = 0;
+    }
+}
+
 void ble(void)
 {
-    rxProcess();
-    if ((txCount == 0) && (commandMode == 0) && (regDataOk == 1) && (BLE_ON == 0))
+    bleSend();
+    bleRxProcess();
+    if ((txCount == 0) && (commandModeFlag == 0) && (regDataOkFlag == 1) && (BLE_ON == 0))
     {
-        pushCmdSendBuff(BLE_TRANSMISSION, I2cDataIn);
-        regDataOk = 0;
+        blePushCmdSendBuff(BLE_TRANSMISSION, txBuff);
+        regDataOkFlag = 0;
     }
     if (delayCount)
     {
         if (flag63ms)
+        {
             delayCount--;
+        }
         return;
     }
     if (flag63ms)
-        timeToTrans = 1;
+        timeToTransFlag = 1;
 
-    if (!BLEInit)
+    if (!bleInitFlag)
     {
         bleInitialization();
     }
     else
     {
-        // BLEInit
+        // bleInitFlag
     }
 }
 
@@ -105,37 +150,39 @@ void bleInitialization()
             step++;
             break;
         case 1:
-            if ((!commandMode) && (txCount == 0))
+            if ((!commandModeFlag) && (txCount == 0))
             {
-                commandMode = 1;
-                commandOK   = 0;
-                pushCmdSendBuff(BLE_PPP, 0);
+                printf("step:%d", (UINT16)step);
+                commandModeFlag = 1;
+                commandOKFlag   = 0;
+                blePushCmdSendBuff(BLE_PPP, 0);
                 step = 2;
             }
             break;
         case 2:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
-                commandOK = 0;
-                pushCmdSendBuff(BLE_GETADDR, 0);
+                printf("step:%d", (UINT16)step);
+                commandOKFlag = 0;
+                blePushCmdSendBuff(BLE_GETADDR, 0);
                 step = 3;
             }
             break;
         case 3:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
-                commandOK = 0;
-                pushCmdSendBuff(BLE_GETNAME, 0);
+                commandOKFlag = 0;
+                blePushCmdSendBuff(BLE_GETNAME, 0);
                 step = 4;
             }
             break;
         case 4:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
                 if (strncmp(bleName, bleAddr, 17))
                 {
-                    commandOK = 0;
-                    pushCmdSendBuff(BLE_SETNAME, bleAddr);
+                    commandOKFlag = 0;
+                    blePushCmdSendBuff(BLE_SETNAME, bleAddr);
                     step = 5;
                 }
                 else
@@ -145,31 +192,31 @@ void bleInitialization()
             }
             break;
         case 5:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
-                commandOK = 0;
-                pushCmdSendBuff(BLE_RESTART, 0);
+                commandOKFlag = 0;
+                blePushCmdSendBuff(BLE_RESTART, 0);
                 step = 6;
             }
             break;
         case 6:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
                 step = 0;
             }
             break;
         case 7:
-            if ((commandOK) && (txCount == 0))
+            if ((commandOKFlag) && (txCount == 0))
             {
-                commandOK = 0;
-                pushCmdSendBuff(BLE_EXIT, 0);
+                commandOKFlag = 0;
+                blePushCmdSendBuff(BLE_EXIT, 0);
                 step = 8;
             }
             break;
         case 8:
-            if (commandOK)
+            if (commandOKFlag)
             {
-                BLEInit = 1;
+                bleInitFlag = 1;
             }
             break;
         default:
@@ -177,38 +224,36 @@ void bleInitialization()
     }
 }
 
-void pushCmdSendBuff(ble_cmd_t cmd, const char *data)
+void blePushCmdSendBuff(ble_cmd_t cmd, const char *dat)
 {
     bleCmdType = cmd;
     memset(txBuff, 0, sizeof(txBuff));
     if (cmd == BLE_TRANSMISSION)
     {
-        txCount = *(data + 3) + 5;
-        memcpy(txBuff, data, txCount);
-        txCountBak = txCount;
+        txCount = *(dat + 3) + 5;
+        memcpy(txBuff, dat, txCount);
     }
     else
     {
         strcpy(txBuff, AT_command[bleCmdType].cmd);
-        if (data)
+        if (dat)
         {
-            strcat(txBuff, data);
+            strcat(txBuff, dat);
             strcat(txBuff, "\r\n");
         }
-        txCount    = strlen(txBuff);
-        txCountBak = txCount;
+        txCount = strlen(txBuff);
     }
 }
-void rxProcess(void)
+void bleRxProcess(void)
 {
-    if (uartGetflag)
+    if (uartGetFlag)
     {
-        uartGetflag = 0;
-        if (commandMode)
+        uartGetFlag = 0;
+        if (commandModeFlag)
         {
             if ((strstr(rxBuff, "\r\n")) || (rxCount >= 25))
             {
-                uartRecOK = 1;
+                uartRecOKFlag = 1;
             }
         }
         else
@@ -265,10 +310,10 @@ void rxProcess(void)
         }
     }
 rxContinue:
-    if (uartRecOK)
+    if (uartRecOKFlag)
     {
-        char *atBak = strstr(rxBuff, "AT+ok");
-        uartRecOK   = 0;
+        char *atBak   = strstr(rxBuff, "AT+ok");
+        uartRecOKFlag = 0;
         if (atBak)
         {
             switch (bleCmdType)
@@ -276,22 +321,22 @@ rxContinue:
                 case BLE_PPP:
                     if (strstr(rxBuff, "AT+"))
                     {
-                        commandOK = 1;
+                        commandOKFlag = 1;
                     }
                     break;
                 // case BLE_SETBR:                    break;
                 case BLE_GETNAME:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     strncpy(bleName, atBak + strlen("AT+ok "), 20);
                     break;
                 case BLE_SETNAME:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     if (strstr(rxBuff, AT_command[bleCmdType].bkKey))
                     {
                     }
                     break;
                 case BLE_GETADDR:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     strncpy(bleAddr, atBak + strlen("AT+ok "), 20);
                     break;
                     // case BLE_GETSTATUS:                    break;
@@ -299,26 +344,26 @@ rxContinue:
                     // case BLE_SETCONNINT:                    break;
                     // case BLE_DISCONNECT:                    break;
                 case BLE_RESTART:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     if (strstr(rxBuff, AT_command[bleCmdType].bkKey))
                     {
-                        commandMode = 0;
+                        commandModeFlag = 0;
                     }
                     break;
                     // case BLE_GETPARA:                    break;
                 case BLE_EXIT:
                     if (strstr(rxBuff, AT_command[bleCmdType].bkKey))
                     {
-                        commandMode = 0;
+                        commandModeFlag = 0;
                     }
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     break;
                 // case BLE_SHUTDOWN:                    break;
                 // case BLE_RESTORE:                    break;
                 // case BLE_GETINFO:                    break;
                 // case BLE_HELP:                    break;
                 default:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     break;
             }
         }
@@ -327,7 +372,7 @@ rxContinue:
             switch (bleCmdType)
             {
                 case BLE_PPP:
-                    commandOK = 1;
+                    commandOKFlag = 1;
                     break;
 
                 default:

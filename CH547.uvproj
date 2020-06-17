@@ -441,6 +441,11 @@
               <FileType>1</FileType>
               <FilePath>.\OPT\serial.c</FilePath>
             </File>
+            <File>
+              <FileName>ble.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\OPT\ble.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -14,6 +14,7 @@
 #include "user_type.h"
 #include "serial.h"
 #include "led.h"
+#include "ble.h"
 
 #pragma NOAREGS
 
@@ -72,6 +73,7 @@ void main()
     TouchKey_Init();
     beepInit();
     serialInit();
+    bleInit();
 
     while (1)
     {
@@ -80,6 +82,7 @@ void main()
             flag1ms = 0;
             getBitFlag();
         }
+        /***************APP area**********************/
         if (flag10ms)
         {
             getKeyBitMap();
@@ -93,6 +96,8 @@ void main()
         }
         ledDisplay();
         // ledGo();
+        ble();
+        /*****************************************/
         if (bitFlag.byte)
         {
             bitClear();
