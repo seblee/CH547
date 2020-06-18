@@ -41,6 +41,7 @@ extern UINT8C CPW_Table[16];
 extern UINT16 Keyvalue[16];
 extern volatile _TKS_FLAGA16_type keyTrg[2];
 extern volatile UINT16 k_count[2];
+extern UINT16 keyBeepMask[2];
 
 extern UINT8 beepCount;
 

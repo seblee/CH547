@@ -27,19 +27,19 @@ static UINT16 ledValue = 0;
 
 void LED_Port_Init(void)
 {
-    P1 |= 0x38;  //д╛хоо╗цП
+    P1 &= ~0x38;  //д╛хоо╗цП
     P1_MOD_OC &= ~0x38;
     P1_DIR_PU |= 0x38;
 
-    P2 |= 0x03;  //д╛хоо╗цП
+    P2 &= ~0x03;  //д╛хоо╗цП
     P2_MOD_OC &= ~0x03;
     P2_DIR_PU |= 0x03;
 
-    P3 |= 0x78;  //д╛хоо╗цП
+    P3 &= ~0x78;  //д╛хоо╗цП
     P3_MOD_OC &= ~0x78;
     P3_DIR_PU |= 0x78;
 
-    P4 |= 0x4f;  //д╛хоо╗цП
+    P4 &= ~0x4f;  //д╛хоо╗цП
     P4_MOD_OC &= ~0x4f;
     P4_DIR_PU |= 0x4f;
 }

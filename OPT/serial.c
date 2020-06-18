@@ -30,9 +30,10 @@ bit rxDone               = 0;
 bit bleDataReday         = 0;
 UINT8C protocolHeader[2] = {0xff, 0xa5};
 
-UINT8 BleDataTemp[20] = {0};
-volatile _TKS_FLAGA_type boardFlag;
+UINT8 BleDataTemp[20]              = {0};
+volatile _TKS_FLAGA_type boardFlag = {0};
 #define boardBLEFlag boardFlag.bits.b0
+#define boardPARAFlag boardFlag.bits.b1
 
 void serialInit(void)
 {
@@ -184,7 +185,6 @@ void serialRxProcess(UINT8* serialDataIn)
         case CMD_KEY:
             break;
         case CMD_LED:
-            printf("CMD_LED\n");
             beepState.byte = *(serialDataIn + 4);
             for (i = 0; i < (*(serialDataIn + 3) - 1); i++)
             {
@@ -205,6 +205,14 @@ void serialRxProcess(UINT8* serialDataIn)
         case CMD_REG_UP:
             break;
         case CMD_REG_DOWN:
+            break;
+        case CMD_PARA:
+            keyBeepMask[0] = (*(serialDataIn + 5) << 8) | *(serialDataIn + 4);
+            keyBeepMask[1] = (*(serialDataIn + 7) << 8) | *(serialDataIn + 6);
+            printf("CMD_PARA 0x%04x 0x%04x\r\n", keyBeepMask[0], keyBeepMask[1]);
+            boardPARAFlag = 1;
+            break;
+        default:
             break;
     }
 }

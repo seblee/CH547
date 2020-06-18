@@ -72,7 +72,7 @@ UINT8 getCheckSum(UINT8 *dat);
 void bleInit(void)
 {
     GPIO_Init(PORT2, PIN5, MODE0);         // BLE_ON
-    GPIO_Init(PORT2, PIN4 | PIN4, MODE1);  // UART_SW  PWR_ON
+    GPIO_Init(PORT2, PIN3 | PIN4, MODE1);  // UART_SW  PWR_ON
     UART_SW = 1;
     PWR_ON  = 1;
 

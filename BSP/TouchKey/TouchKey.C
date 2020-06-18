@@ -21,8 +21,9 @@ UINT8 keyTime[16]    = {0};
 UINT16 keyData       = 0;
 volatile _TKS_FLAGA16_type keyTrg[2];
 UINT16 k_count[2];
-
+UINT16 keyBeepMask[2] = {0xffff, 0xffff};
 #define RESTAIN_TIMES 200  // 200 ¡Á 10ms = 2s
+
 /*******************************************************************************
  * Function Name  : TouchKey_Init
  * Description    : ´¥Ãþ°´¼ü³õÊ¼»¯
@@ -217,8 +218,9 @@ void getKeyBitMap(void)
     keyTrg[0].word = keyState & (keyState ^ k_count[0]);
     k_count[0]     = keyState;
 
-    if (keyTrg[0].word)
+    if (keyTrg[0].word & keyBeepMask[0])
     {
+        printf("word[0]0x%04x 0x%04x\r\n", keyTrg[0].word, keyBeepMask[0]);
         beepCount++;
     }
     keyState = 0;
@@ -244,8 +246,10 @@ void getKeyBitMap(void)
     }
     keyTrg[1].word = keyState & (keyState ^ k_count[1]);
     k_count[1]     = keyState;
-    if (keyTrg[1].word)
+    if (keyTrg[1].word & keyBeepMask[1])
     {
+        printf("word[1]0x%04x 0x%04x\r\n", keyTrg[1].word, keyBeepMask[1]);
+
         beepCount++;
     }
 }
