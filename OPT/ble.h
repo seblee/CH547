@@ -49,6 +49,25 @@ typedef enum
     BLE_HELP,
     BLE_TRANSMISSION,
 } ble_cmd_t;
+typedef enum
+{
+    BLEINIT_STEP0,
+    BLEINIT_STEP1,
+    BLEINIT_STEP2,
+    BLEINIT_STEP3,
+    BLEINIT_STEP4,
+    BLEINIT_STEP5,
+    BLEINIT_STEP6,
+    BLEINIT_STEP7,
+    BLEINIT_STEP8,
+    BLEINIT_STEP9,
+    BLEINIT_STEPA,
+    BLEINIT_STEPB,
+    BLEINIT_STEPC,
+    BLEINIT_STEPD,
+    BLEINIT_STEPE,
+    BLEINIT_STEPF,
+}  ;
 
 void ble(void);
 void bleInit(void);

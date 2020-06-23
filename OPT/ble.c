@@ -20,7 +20,7 @@
 
 static UINT8 rxCount       = 0;
 static UINT8 rxStep        = 0;
-static UINT8 txBuff[30]    = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
+static UINT8 txBuff[RXMAX] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
 static UINT8 rxBuff[RXMAX] = {0};
 static UINT8 txCount       = 0;
 
@@ -73,11 +73,14 @@ void bleInit(void)
 {
     GPIO_Init(PORT2, PIN5, MODE0);         // BLE_ON
     GPIO_Init(PORT2, PIN3 | PIN4, MODE1);  // UART_SW  PWR_ON
-    UART_SW = 1;
-    PWR_ON  = 1;
+    UART_SW = 0;
+    PWR_ON  = 0;
+    GPIO_Init(PORT2, PIN6, MODE0);
+    GPIO_Init(PORT2, PIN7, MODE1);
 
     IP_EX |= bIP_UART1;
     CH549UART1Init();
+    PWR_ON = 1;
 }
 
 void bleUart1DataIn(UINT8 dat)
@@ -112,7 +115,7 @@ void bleSend(void)
 
 void ble(void)
 {
-    bleSend();
+    // bleSend();
     bleRxProcess();
     if ((txCount == 0) && (commandModeFlag == 0) && (regDataOkFlag == 1) && (BLE_ON == 0))
     {
@@ -145,79 +148,102 @@ void bleInitialization()
     static char step = 0;
     switch (step)
     {
-        case 0:
+        case BLEINIT_STEP0:
+            delayCount = 10;
+            step++;
+            break;
+        case BLEINIT_STEP1:
+            UART_SW    = 1;
             delayCount = 100;
             step++;
             break;
-        case 1:
+        case BLEINIT_STEP2:
             if ((!commandModeFlag) && (txCount == 0))
             {
-                printf("step:%d", (UINT16)step);
+                printf("BLEINIT_STEP2\n");
                 commandModeFlag = 1;
                 commandOKFlag   = 0;
                 blePushCmdSendBuff(BLE_PPP, 0);
-                step = 2;
+                step++;
             }
             break;
-        case 2:
+        case BLEINIT_STEP3:
             if ((commandOKFlag) && (txCount == 0))
             {
-                printf("step:%d", (UINT16)step);
+                printf("BLEINIT_STEP3\n");
                 commandOKFlag = 0;
                 blePushCmdSendBuff(BLE_GETADDR, 0);
-                step = 3;
+                step++;
             }
             break;
-        case 3:
+        case BLEINIT_STEP4:
             if ((commandOKFlag) && (txCount == 0))
             {
+                printf("BLEINIT_STEP4\n");
                 commandOKFlag = 0;
                 blePushCmdSendBuff(BLE_GETNAME, 0);
-                step = 4;
+                step++;
             }
             break;
-        case 4:
+        case BLEINIT_STEP5:
             if ((commandOKFlag) && (txCount == 0))
             {
+                printf("BLEINIT_STEP5\n");
                 if (strncmp(bleName, bleAddr, 17))
                 {
                     commandOKFlag = 0;
                     blePushCmdSendBuff(BLE_SETNAME, bleAddr);
-                    step = 5;
+                    step = BLEINIT_STEP6;
                 }
                 else
                 {
-                    step = 7;
+                    step = BLEINIT_STEP8;
                 }
             }
             break;
-        case 5:
+        case BLEINIT_STEP6:
             if ((commandOKFlag) && (txCount == 0))
             {
+                printf("BLEINIT_STEP6\n");
                 commandOKFlag = 0;
                 blePushCmdSendBuff(BLE_RESTART, 0);
-                step = 6;
+                step = BLEINIT_STEP7;
             }
             break;
-        case 6:
+        case BLEINIT_STEP7:
             if ((commandOKFlag) && (txCount == 0))
             {
-                step = 0;
+                printf("BLEINIT_STEP7\n");
+                step = BLEINIT_STEP1;
             }
             break;
-        case 7:
+        case BLEINIT_STEP8:
             if ((commandOKFlag) && (txCount == 0))
             {
+                printf("BLEINIT_STEP8\n");
                 commandOKFlag = 0;
                 blePushCmdSendBuff(BLE_EXIT, 0);
-                step = 8;
+                step = BLEINIT_STEP9;
             }
             break;
-        case 8:
+        case BLEINIT_STEP9:
             if (commandOKFlag)
             {
+                printf("BLEINIT_STEP9\n");
                 bleInitFlag = 1;
             }
+            break;
+        case BLEINIT_STEPA:
+            break;
+        case BLEINIT_STEPB:
+            break;
+        case BLEINIT_STEPC:
+            break;
+        case BLEINIT_STEPD:
+            break;
+        case BLEINIT_STEPE:
+            break;
+        case BLEINIT_STEPF:
             break;
         default:
             break;
@@ -226,6 +252,7 @@ void bleInitialization()
 
 void blePushCmdSendBuff(ble_cmd_t cmd, const char *dat)
 {
+    UINT8 i;
     bleCmdType = cmd;
     memset(txBuff, 0, sizeof(txBuff));
     if (cmd == BLE_TRANSMISSION)
@@ -243,6 +270,11 @@ void blePushCmdSendBuff(ble_cmd_t cmd, const char *dat)
         }
         txCount = strlen(txBuff);
     }
+    for (i = 0; i < txCount; i++)
+    {
+        CH549UART1SendByte(txBuff[i]);
+    }
+    txCount = 0;
 }
 void bleRxProcess(void)
 {

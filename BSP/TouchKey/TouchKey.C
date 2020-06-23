@@ -220,8 +220,7 @@ void getKeyBitMap(void)
 
     if (keyTrg[0].word & keyBeepMask[0])
     {
-        printf("word[0]0x%04x 0x%04x\r\n", keyTrg[0].word, keyBeepMask[0]);
-        beepCount++;
+         beepCount++;
     }
     keyState = 0;
     for (i = 0; i < 12; i++)
@@ -248,9 +247,7 @@ void getKeyBitMap(void)
     k_count[1]     = keyState;
     if (keyTrg[1].word & keyBeepMask[1])
     {
-        printf("word[1]0x%04x 0x%04x\r\n", keyTrg[1].word, keyBeepMask[1]);
-
-        beepCount++;
+         beepCount++;
     }
 }
 

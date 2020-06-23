@@ -106,66 +106,25 @@ void ledDisplay(void)
             }
         }
     }
-
-    for (i = 0; i < LEDNUM; i++)
+    if (flag63ms || flag250ms || flag500ms)
     {
-        value = ((ledValueTemp >> i) & 1);
-        if (i % 2 == 0)
+        for (i = 0; i < LEDNUM; i++)
         {
-            State = ledState[i / 2].byte & 0x0f;
-        }
-        else
-        {
-            State = (ledState[i / 2].byte >> 4);
-        }
-
-        if (ledFlashFast[i] > 0)
-        {
-            if (State >= STATE_LED_FLASH_1_T)
+            value = ((ledValueTemp >> i) & 1);
+            if (i % 2 == 0)
             {
-                ledFlashFast[i] += 2 * (State - 4);
-                if (i % 2 == 0)
-                {
-                    ledState[i / 2].byte &= 0xf0;
-                }
-                else
-                {
-                    ledState[i / 2].byte &= 0x0f;
-                }
+                State = ledState[i / 2].byte & 0x0f;
             }
-            if (flag63ms)
+            else
             {
-                ledFlashFast[i]--;
-                value = !((ledValueTemp >> i) & 1);
+                State = (ledState[i / 2].byte >> 4);
             }
-        }
-        else
-        {
-            switch (State)
-            {
-                case STATE_LED_OFF:
-                    value = LED_OFF;
-                    break;
-                case STATE_LED_ON:
-                    value = LED_ON;
-                    break;
-                case STATE_LED_FLASH_2HZ:
-                    if (flag250ms)
-                        value = flashFlag_2HZ;
-                    break;
-                case STATE_LED_FLASH_1HZ:
-                    if (flag500ms)
-                        value = flashFlag_1HZ;
-                    break;
-                case STATE_LED_FLASH_0_5HZ:
-                    if (flag500ms)
-                        value = flashFlag_0_5HZ;
-                    break;
 
-                case STATE_LED_FLASH_1_T:  //闪烁一下
-                case STATE_LED_FLASH_2_T:  //闪烁两下
-                case STATE_LED_FLASH_3_T:  //闪烁三下
-                    ledFlashFast[i] += 2 * (State - 4);
+            if (ledFlashFast[i] > 0)
+            {
+                if (State >= STATE_LED_FLASH_1_T)
+                {
+                    ledFlashFast[i] += 2 * (State - STATE_LED_FLASH_0_5HZ);
                     if (i % 2 == 0)
                     {
                         ledState[i / 2].byte &= 0xf0;
@@ -174,39 +133,126 @@ void ledDisplay(void)
                     {
                         ledState[i / 2].byte &= 0x0f;
                     }
-                    break;
+                }
+                if (flag63ms)
+                {
+                    ledFlashFast[i]--;
+                    value = !((ledValueTemp >> i) & 1);
+                }
             }
-        }
-        if (value)
-        {
-            ledValueTemp |= 1 << i;
-        }
-        else
-        {
-            ledValueTemp &= ~(1 << i);
-        }
-        if (ledValueTemp ^ ledValue)
-        {
-            if (ledValueTemp & (1 << i))
-                ledSetState(i, LED_OFF);
             else
             {
-                ledSetState(i, LED_ON);
+                switch (State)
+                {
+                    case STATE_LED_OFF:
+                        value = LED_OFF;
+                        break;
+                    case STATE_LED_ON:
+                        value = LED_ON;
+                        break;
+                    case STATE_LED_FLASH_2HZ:
+                        if (flag250ms)
+                            value = flashFlag_2HZ;
+                        break;
+                    case STATE_LED_FLASH_1HZ:
+                        if (flag500ms)
+                            value = flashFlag_1HZ;
+                        break;
+                    case STATE_LED_FLASH_0_5HZ:
+                        if (flag500ms)
+                            value = flashFlag_0_5HZ;
+                        break;
+                    case STATE_LED_FLASH_1_T:  //闪烁一下
+                    case STATE_LED_FLASH_2_T:  //闪烁两下
+                    case STATE_LED_FLASH_3_T:  //闪烁三下
+                        ledFlashFast[i] += 2 * (State - STATE_LED_FLASH_0_5HZ);
+                        if (i % 2 == 0)
+                        {
+                            ledState[i / 2].byte &= 0xf0;
+                        }
+                        else
+                        {
+                            ledState[i / 2].byte &= 0x0f;
+                        }
+                        break;
+                }
             }
+            if (value)
+            {
+                ledValueTemp |= 1 << i;
+            }
+            else
+            {
+                ledValueTemp &= ~(1 << i);
+            }
+            if (ledValueTemp ^ ledValue)
+            {
+                if (ledValueTemp & (1 << i))
+                    ledSetState(i, LED_OFF);
+                else
+                {
+                    ledSetState(i, LED_ON);
+                }
+            }
+            ledValue = ledValueTemp;
         }
-        ledValue = ledValueTemp;
     }
 
-    /*******led1****************/
+    // /*******led0****************/
     // if (ledFlashFast[0] > 0)
     // {
-    //     if (led1State == STATE_LED_FLASH_2_T)
+    //     if (led0State >= STATE_LED_FLASH_1_T)
     //     {
-    //         ledFlashFast[0] += 4;
+    //         ledFlashFast[0] += 2 * (led0State - STATE_LED_FLASH_0_5HZ);
+    //         led0State = 0;
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
     //         ledFlashFast[0]--;
+    //         LED0 = !LED0;
+    //     }
+    // }
+    // else
+    // {
+    //     switch (led0State)
+    //     {
+    //         case STATE_LED_OFF:
+    //             LED0 = LED_OFF;
+    //             break;
+    //         case STATE_LED_ON:
+    //             LED0 = LED_ON;
+    //             break;
+    //         case STATE_LED_FLASH_2HZ:
+    //             if (flag250ms)
+    //                 LED0 = flashFlag_2HZ;
+    //             break;
+    //         case STATE_LED_FLASH_1HZ:
+    //             if (flag500ms)
+    //                 LED0 = flashFlag_1HZ;
+    //             break;
+    //         case STATE_LED_FLASH_0_5HZ:
+    //             if (flag500ms)
+    //                 LED0 = flashFlag_0_5HZ;
+    //             break;
+    //         case STATE_LED_FLASH_1_T:  //闪烁一下
+    //         case STATE_LED_FLASH_2_T:  //闪烁两下
+    //         case STATE_LED_FLASH_3_T:  //闪烁三下
+    //             ledFlashFast[0] += 2 * (led0State - STATE_LED_FLASH_0_5HZ);
+    //             led0State = 0;
+    //             break;
+    //     }
+    // }
+    // /*******led1****************/
+    // if (ledFlashFast[1] > 0)
+    // {
+    //     if (led1State >= STATE_LED_FLASH_1_T)
+    //     {
+    //         ledFlashFast[1] += 2 * (led1State - STATE_LED_FLASH_0_5HZ);
+    //         led1State = 0;
+    //     }
+    //     if (flag60ms)
+    //     {
+    //         ledFlashFast[1]--;
     //         LED1 = !LED1;
     //     }
     // }
@@ -232,22 +278,24 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED1 = flashFlag_0_5HZ;
     //             break;
+    //         case STATE_LED_FLASH_1_T:  //闪烁一下
     //         case STATE_LED_FLASH_2_T:  //闪烁两下
-    //             ledFlashFast[0] += 4;
+    //         case STATE_LED_FLASH_3_T:  //闪烁三下
+    //             ledFlashFast[1] += 2 * (led1State - STATE_LED_FLASH_0_5HZ);
     //             led1State = 0;
     //             break;
     //     }
     // }
-    // /*******led2****************/
-    // if (ledFlashFast[1] > 0)
+    // // /*******led2****************/
+    // if (ledFlashFast[2] > 0)
     // {
-    //     if (led2State == STATE_LED_FLASH_2_T)
+    //     if (led2State >= STATE_LED_FLASH_1_T)
     //     {
-    //         ledFlashFast[1] += 4;
+    //         ledFlashFast[2] += 2 * (led2State - STATE_LED_FLASH_0_5HZ);
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
-    //         ledFlashFast[1]--;
+    //         ledFlashFast[2]--;
     //         LED2 = !LED2;
     //     }
     // }
@@ -273,22 +321,24 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED2 = flashFlag_0_5HZ;
     //             break;
+    //         case STATE_LED_FLASH_1_T:  //闪烁一下
     //         case STATE_LED_FLASH_2_T:  //闪烁两下
-    //             ledFlashFast[1] += 4;
+    //         case STATE_LED_FLASH_3_T:  //闪烁三下
+    //             ledFlashFast[2] += 2 * (led2State - STATE_LED_FLASH_0_5HZ);
     //             led2State = 0;
     //             break;
     //     }
     // }
-    /*******led3****************/
-    // if (ledFlashFast[2] > 0)
+    // /*******led3****************/
+    // if (ledFlashFast[3] > 0)
     // {
-    //     if (led3State == STATE_LED_FLASH_2_T)
+    //     if (led3State >= STATE_LED_FLASH_1_T)
     //     {
-    //         ledFlashFast[2] += 4;
+    //         ledFlashFast[3] += 2 * (led3State - STATE_LED_FLASH_0_5HZ);
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
-    //         ledFlashFast[2]--;
+    //         ledFlashFast[3]--;
     //         LED3 = !LED3;
     //     }
     // }
@@ -314,22 +364,24 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED3 = flashFlag_0_5HZ;
     //             break;
+    //         case STATE_LED_FLASH_1_T:  //闪烁一下
     //         case STATE_LED_FLASH_2_T:  //闪烁两下
-    //             ledFlashFast[2] += 4;
+    //         case STATE_LED_FLASH_3_T:  //闪烁三下
+    //             ledFlashFast[3] += 2 * (led3State - STATE_LED_FLASH_0_5HZ);
     //             led3State = 0;
     //             break;
     //     }
     // }
-    /*******led4****************/
-    // if (ledFlashFast[3] > 0)
+    // /*******led4****************/
+    // if (ledFlashFast[4] > 0)
     // {
-    //     if (led4State == STATE_LED_FLASH_2_T)
+    //     if (led4State >= STATE_LED_FLASH_1_T)
     //     {
-    //         ledFlashFast[3] += 4;
+    //         ledFlashFast[4] += 2 * (led4State - STATE_LED_FLASH_0_5HZ);
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
-    //         ledFlashFast[3]--;
+    //         ledFlashFast[4]--;
     //         LED4 = !LED4;
     //     }
     // }
@@ -355,8 +407,10 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED4 = flashFlag_0_5HZ;
     //             break;
+    //         case STATE_LED_FLASH_1_T:  //闪烁一下
     //         case STATE_LED_FLASH_2_T:  //闪烁两下
-    //             ledFlashFast[3] += 4;
+    //         case STATE_LED_FLASH_3_T:  //闪烁三下
+    //             ledFlashFast[4] += 2 * (led4State - STATE_LED_FLASH_0_5HZ);
     //             led4State = 0;
     //             break;
     //     }
@@ -365,11 +419,11 @@ void ledDisplay(void)
     // /*******led5****************/
     // if (ledFlashFast[4] > 0)
     // {
-    //     if (led5State == STATE_LED_FLASH_2_T)
+    //     if (led5State >= STATE_LED_FLASH_1_T)
     //     {
     //         ledFlashFast[4] += 4;
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
     //         ledFlashFast[4]--;
     //         LED5 = !LED5;
@@ -397,7 +451,9 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED5 = flashFlag_0_5HZ;
     //             break;
-    //         case STATE_LED_FLASH_2_T:  //闪烁两下
+    //                case STATE_LED_FLASH_1_T:  //闪烁一下
+    // case STATE_LED_FLASH_2_T:  //闪烁两下
+    // case STATE_LED_FLASH_3_T:  //闪烁三下
     //             ledFlashFast[4] += 4;
     //             led5State = 0;
     //             break;
@@ -406,11 +462,11 @@ void ledDisplay(void)
     // /*******led6****************/
     // if (ledFlashFast[5] > 0)
     // {
-    //     if (led6State == STATE_LED_FLASH_2_T)
+    //     if (led6State >= STATE_LED_FLASH_1_T)
     //     {
     //         ledFlashFast[5] += 4;
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
     //         ledFlashFast[5]--;
     //         LED6 = !LED6;
@@ -438,7 +494,9 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED6 = flashFlag_0_5HZ;
     //             break;
-    //         case STATE_LED_FLASH_2_T:  //闪烁两下
+    //                case STATE_LED_FLASH_1_T:  //闪烁一下
+    // case STATE_LED_FLASH_2_T:  //闪烁两下
+    // case STATE_LED_FLASH_3_T:  //闪烁三下
     //             ledFlashFast[5] += 4;
     //             led6State = 0;
     //             break;
@@ -447,11 +505,11 @@ void ledDisplay(void)
     // /*******led7****************/
     // if (ledFlashFast[6] > 0)
     // {
-    //     if (led7State == STATE_LED_FLASH_2_T)
+    //     if (led7State >= STATE_LED_FLASH_1_T)
     //     {
     //         ledFlashFast[6] += 4;
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
     //         ledFlashFast[6]--;
     //         LED7 = !LED7;
@@ -479,7 +537,9 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED7 = flashFlag_0_5HZ;
     //             break;
-    //         case STATE_LED_FLASH_2_T:  //闪烁两下
+    //                case STATE_LED_FLASH_1_T:  //闪烁一下
+    // case STATE_LED_FLASH_2_T:  //闪烁两下
+    // case STATE_LED_FLASH_3_T:  //闪烁三下
     //             ledFlashFast[6] += 4;
     //             led7State = 0;
     //             break;
@@ -488,11 +548,11 @@ void ledDisplay(void)
     // /*******led8****************/
     // if (ledFlashFast[7] > 0)
     // {
-    //     if (led8State == STATE_LED_FLASH_2_T)
+    //     if (led8State >= STATE_LED_FLASH_1_T)
     //     {
     //         ledFlashFast[7] += 4;
     //     }
-    //     if (flag63ms)
+    //     if (flag60ms)
     //     {
     //         ledFlashFast[7]--;
     //         LED8 = !LED8;
@@ -520,7 +580,9 @@ void ledDisplay(void)
     //             if (flag500ms)
     //                 LED8 = flashFlag_0_5HZ;
     //             break;
-    //         case STATE_LED_FLASH_2_T:  //闪烁两下
+    //                case STATE_LED_FLASH_1_T:  //闪烁一下
+    // case STATE_LED_FLASH_2_T:  //闪烁两下
+    // case STATE_LED_FLASH_3_T:  //闪烁三下
     //             ledFlashFast[7] += 4;
     //             led8State = 0;
     //             break;
