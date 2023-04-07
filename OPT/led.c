@@ -16,26 +16,46 @@
  **/
 #include "led.h"
 
-volatile _USR_FLAGA_type ledState[4];
-UINT8 ledFlashFast[8]     = {0};
-volatile UINT8 flashCount = 0;
+#define LEDNUM 11
+volatile _USR_FLAGA_type ledState[LEDNUM];
+UINT8 ledFlashFast[LEDNUM] = {0};
+volatile UINT8 flashCount  = 0;
 
 bit flashFlag_0_5HZ;
 bit flashFlag_1HZ;
 bit flashFlag_2HZ;
 
-// sbit LED2 = P2 ^ 2;
-sbit LED3 = P2 ^ 3;
-sbit LED4 = P2 ^ 4;
-sbit LED5 = P2 ^ 5;
+sbit LED0  = P3 ^ 4;
+sbit LED1  = P3 ^ 5;
+sbit LED2  = P3 ^ 6;
+sbit LED3  = P3 ^ 7;
+sbit LED4  = P4 ^ 3;
+sbit LED5  = P4 ^ 2;
+sbit LED6  = P4 ^ 6;
+sbit LED7  = P4 ^ 1;
+sbit LED8  = P4 ^ 0;
+sbit LED9  = P2 ^ 0;
+sbit LED10 = P2 ^ 1;
 
 UINT16 ledValue = 0;
 
 void LED_Port_Init(void)
 {
-    P2 |= (0xF << 2);  //Ä¬ÈÏÏ¨Ãð
-    P2_MOD_OC &= ~(0xF << 2);
-    P2_DIR_PU |= (0xF << 2);
+    P2 |= 0x03;  //Ä¬ÈÏÏ¨Ãð
+    P2_MOD_OC &= ~0x03;
+    P2_DIR_PU |= 0x03;
+
+    P3 |= 0xf0;  //Ä¬ÈÏÏ¨Ãð
+    P3_MOD_OC &= ~0xf0;
+    P3_DIR_PU |= 0xf0;
+
+    P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
+    P4_MOD_OC &= ~0x4f;
+    P4_DIR_PU |= 0x4f;
+
+    P4 |= 0x4f;  //Ä¬ÈÏÏ¨Ãð
+    P4_MOD_OC &= ~0x4f;
+    P4_DIR_PU |= 0x4f;
 }
 
 void ledDisplay(void)
@@ -56,7 +76,6 @@ void ledDisplay(void)
     }
     if (flag500ms)
     {
-        LED5 = ~LED5;
         if (flashFlag_1HZ)
         {
             flashFlag_1HZ = 0;

@@ -54,7 +54,7 @@ void serialSend(void)
 {
     static UINT8 index = 0;
 
-    if (rxDone && (txCount == 0))
+    if (flag63ms && (txCount == 0))
     {
         rxDone    = 0;
         txBuff[0] = 0xff;
