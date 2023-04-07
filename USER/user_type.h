@@ -56,14 +56,14 @@ enum
 
 enum
 {
-    CMD_IDEL,
-    CMD_KEY,
-    CMD_LED,
-    CMD_REG_UP,
-    CMD_REG_DOWN,
-    CMD_AUX_DIAI,
-    CMD_AUX_DO,
-    CMD_PARA,
+    CMD_IDEL     = 0,
+    CMD_KEY      = 1,
+    CMD_LED      = 2,
+    CMD_REG_UP   = 3,
+    CMD_REG_DOWN = 4,
+    CMD_AUX_DIAI = 5,
+    CMD_AUX_DO   = 6,
+    CMD_PARA     = 7,
 };
 
 extern volatile _TKS_FLAGA_type bitFlag;
